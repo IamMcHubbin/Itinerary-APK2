@@ -6,10 +6,12 @@ import type { AppView } from './components/TripHeader'
 import DaySelector from './components/DaySelector'
 import DayTimeline from './components/DayTimeline'
 import WishlistPage from './components/WishlistPage'
+import BudgetPage from './components/BudgetPage'
 import { TripProvider, useTripStore } from './context/TripContext'
 import { EditModeProvider, useEditMode } from './context/EditModeContext'
 import { CommentsProvider } from './context/CommentsContext'
 import { WishlistProvider } from './context/WishlistContext'
+import { BudgetProvider } from './context/BudgetContext'
 
 function AppShell() {
   const { trip, addDay } = useTripStore()
@@ -42,6 +44,8 @@ function AppShell() {
       <main className="pb-24">
         {view === 'wishlist' ? (
           <WishlistPage />
+        ) : view === 'budget' ? (
+          <BudgetPage />
         ) : day ? (
           <AnimatePresence mode="wait">
             <DayTimeline key={day.id} day={day} dayIndex={dayIndex} />
@@ -103,7 +107,9 @@ export default function App() {
       <EditModeProvider>
         <CommentsProvider>
           <WishlistProvider>
-            <AppShell />
+            <BudgetProvider>
+              <AppShell />
+            </BudgetProvider>
           </WishlistProvider>
         </CommentsProvider>
       </EditModeProvider>

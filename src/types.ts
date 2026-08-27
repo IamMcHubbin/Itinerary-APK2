@@ -81,6 +81,17 @@ export interface WishlistItem {
   favoritedBy?: string[]
 }
 
+export interface Expense {
+  id: string
+  title: string
+  /** Always JPY — the trip currency. */
+  amountJPY: number
+  paidBy: string
+  /** Names sharing this expense equally. */
+  splitBetween: string[]
+  createdAt: number
+}
+
 export interface Trip {
   title: string
   subtitle: string
