@@ -1,6 +1,8 @@
-import { Check, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Heart, Trash2 } from 'lucide-react'
 import { useWishlist } from '../context/WishlistContext'
 import { useTripStore } from '../context/TripContext'
+import { useDisplayName } from '../hooks/useDisplayName'
 import type { WishlistItem } from '../types'
 
 interface WishlistItemRowProps {
@@ -8,8 +10,30 @@ interface WishlistItemRowProps {
 }
 
 export default function WishlistItemRow({ item }: WishlistItemRowProps) {
-  const { setPlanned, deleteItem } = useWishlist()
+  const { setPlanned, deleteItem, toggleFavorite } = useWishlist()
   const { trip } = useTripStore()
+  const { name, saveName } = useDisplayName()
+  const [showNamePrompt, setShowNamePrompt] = useState(false)
+  const [nameDraft, setNameDraft] = useState('')
+
+  const favoritedBy = item.favoritedBy ?? []
+  const iFavorited = name ? favoritedBy.includes(name) : false
+
+  const handleFavoriteClick = () => {
+    if (!name) {
+      setShowNamePrompt(true)
+      return
+    }
+    toggleFavorite(item.id, name, !iFavorited)
+  }
+
+  const confirmNameAndFavorite = () => {
+    const trimmed = nameDraft.trim()
+    if (!trimmed) return
+    saveName(trimmed)
+    toggleFavorite(item.id, trimmed, true)
+    setShowNamePrompt(false)
+  }
 
   return (
     <div
@@ -45,9 +69,54 @@ export default function WishlistItemRow({ item }: WishlistItemRowProps) {
         {item.notes && (
           <p className="mt-0.5 text-xs text-sumi/50 dark:text-white/40">{item.notes}</p>
         )}
-        <p className="mt-1 text-[11px] text-sumi/40 dark:text-white/30">
-          Suggested by {item.addedBy}
-        </p>
+
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          <p className="text-[11px] text-sumi/40 dark:text-white/30">
+            Suggested by {item.addedBy}
+          </p>
+          <button
+            type="button"
+            onClick={handleFavoriteClick}
+            aria-pressed={iFavorited}
+            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
+              iFavorited
+                ? 'bg-sakura/20 text-sakura-deep dark:bg-sakura/25 dark:text-sakura'
+                : 'text-sumi/40 hover:text-sakura-deep dark:text-white/30 dark:hover:text-sakura'
+            }`}
+          >
+            <Heart size={12} fill={iFavorited ? 'currentColor' : 'none'} />
+            {favoritedBy.length > 0 ? favoritedBy.length : ''}
+          </button>
+        </div>
+
+        {favoritedBy.length > 0 && (
+          <p className="mt-0.5 text-[11px] text-sakura-deep dark:text-sakura">
+            ♥ {favoritedBy.join(', ')}
+          </p>
+        )}
+
+        {showNamePrompt && (
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <input
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') confirmNameAndFavorite()
+              }}
+              placeholder="Your name"
+              autoFocus
+              className="min-w-0 flex-1 rounded-full border border-sumi/15 bg-transparent px-2.5 py-1 text-xs text-sumi placeholder:text-sumi/40 focus:border-ai focus:outline-none dark:border-white/15 dark:text-white dark:placeholder:text-white/30"
+            />
+            <button
+              type="button"
+              onClick={confirmNameAndFavorite}
+              disabled={!nameDraft.trim()}
+              className="flex-none rounded-full bg-ai px-3 py-1 text-[11px] font-medium text-washi disabled:opacity-30 dark:bg-ai-light"
+            >
+              Save
+            </button>
+          </div>
+        )}
 
         {item.planned && (
           <select

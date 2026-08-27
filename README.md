@@ -43,7 +43,9 @@ across everyone viewing the app (see [Architecture](#architecture) below).
   that), then tick it off once it's actually planned — optionally picking
   which day it landed on. This is deliberately separate from the itinerary:
   it's a running "things we might want to do" list, checked off manually
-  rather than auto-matched against activities.
+  rather than auto-matched against activities. Tap the heart on any item to
+  favorite it — everyone's favorites show by name, and favorited items sort
+  toward the top of their section, so personal stand-outs are easy to spot.
 - There's no login and no per-editor permissions — anyone with the app URL
   can edit or comment. That's a deliberate tradeoff for a small private trip
   group; see [Architecture](#architecture) if you want to lock it down further.
