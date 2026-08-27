@@ -33,7 +33,10 @@ export default function WishlistSection({ category, items }: WishlistSectionProp
   const authorName = name ?? nameDraft.trim()
   const openCount = items.filter((item) => !item.planned).length
   const sorted = [...items].sort(
-    (a, b) => Number(a.planned) - Number(b.planned) || a.createdAt - b.createdAt,
+    (a, b) =>
+      Number(a.planned) - Number(b.planned) ||
+      (b.favoritedBy?.length ?? 0) - (a.favoritedBy?.length ?? 0) ||
+      a.createdAt - b.createdAt,
   )
 
   const submit = () => {

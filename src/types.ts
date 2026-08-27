@@ -77,6 +77,8 @@ export interface WishlistItem {
   planned: boolean
   /** Which day this ended up on, once planned — for context, not required. */
   linkedDayId?: string
+  /** Display names of everyone who's favorited this item. */
+  favoritedBy?: string[]
 }
 
 export interface Trip {

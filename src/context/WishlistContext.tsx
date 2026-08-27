@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import type { ReactNode } from 'react'
 import {
   addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -19,6 +21,7 @@ interface WishlistContextValue {
   addItem: (category: WishlistCategory, title: string, notes: string, author: string) => void
   setPlanned: (itemId: string, planned: boolean, linkedDayId?: string) => void
   deleteItem: (itemId: string) => void
+  toggleFavorite: (itemId: string, name: string, favorited: boolean) => void
 }
 
 const WishlistContext = createContext<WishlistContextValue | null>(null)
@@ -74,8 +77,20 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const toggleFavorite = useCallback((itemId: string, name: string, favorited: boolean) => {
+    if (!db) return
+    // arrayUnion/arrayRemove apply atomically server-side, so two people
+    // favoriting the same item at once can't clobber each other the way a
+    // read-modify-write of the whole array could.
+    updateDoc(doc(db, 'trips', TRIP_ID, 'wishlist', itemId), {
+      favoritedBy: favorited ? arrayUnion(name) : arrayRemove(name),
+    }).catch((error) => console.error('Failed to update favorite', error))
+  }, [])
+
   return (
-    <WishlistContext.Provider value={{ items, ready, addItem, setPlanned, deleteItem }}>
+    <WishlistContext.Provider
+      value={{ items, ready, addItem, setPlanned, deleteItem, toggleFavorite }}
+    >
       {children}
     </WishlistContext.Provider>
   )
