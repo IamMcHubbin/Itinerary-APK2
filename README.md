@@ -28,6 +28,9 @@ automatically via GitHub Actions on every push — see
   "who owes who" settle-up suggestions
 - **Overview** — every day at a glance as a color-coded route map, with
   trip-wide stats and tap-to-jump navigation into any day
+- **Presence avatars** — a little colored, initialed circle in the header for
+  everyone who currently has the app open, so you can see who else is looking
+  at it right now
 - Swipe/tap between days with a sticky day picker
 - Installable to an Android or iOS home screen, works offline
 - Light and dark mode, tuned for both
@@ -60,6 +63,11 @@ across everyone viewing the app (see [Architecture](#architecture) below).
   ("Alex owes Sam ¥11,500") computed by greedily paying the biggest debtor
   from the biggest creditor — same approach Splitwise itself uses. All
   amounts are JPY.
+- **Presence**: while the app is open, your display name shows up as a small
+  avatar in the header for everyone else with the app open too — no action
+  needed. It disappears automatically within a minute or so of closing the
+  tab or losing connection. Only active while [Realtime Database](#presence)
+  is configured; the rest of the app works fine without it.
 - There's no login and no per-editor permissions — anyone with the app URL
   can edit or comment. That's a deliberate tradeoff for a small private trip
   group; see [Architecture](#architecture) if you want to lock it down further.
@@ -110,6 +118,46 @@ with a `map`, falling back to `src/lib/cityCoordinates.ts`) and:
 Results are cached in memory for 3 hours per location+date. As the trip gets
 closer, days automatically flip from the historical reference to a real
 forecast — no code changes needed.
+
+### Presence
+
+`src/hooks/usePresence.ts` uses Firebase **Realtime Database** (RTDB) — a
+different product from Firestore, chosen because it has built-in
+`onDisconnect()` support: Firestore has no equivalent, so there's no reliable
+way to detect "this tab just closed" with it alone.
+
+Each open tab writes `{name, view, lastSeen}` to `status/{randomSessionId}`,
+refreshed every 25s, with `onDisconnect().remove()` registered so a closed
+tab or dropped connection cleans itself up automatically; entries not
+refreshed in 70s are also filtered out client-side as a backstop. Everyone's
+`status/*` entries are subscribed to live and rendered as small avatar
+circles (initials, colored by a hash of the name) in the header.
+
+This is entirely additive — `rtdb` (`src/lib/firebase.ts`) is only
+initialized once `VITE_FIREBASE_DATABASE_URL` is set, same pattern as
+Firestore's `firebaseConfigured`. Without it, presence avatars just don't
+appear; everything else keeps working.
+
+**One-time setup**, in the [Firebase console](https://console.firebase.google.com/):
+
+1. **Build → Realtime Database → Create Database**. Pick any region, and
+   start in **locked mode** (rules get replaced in the next step anyway).
+2. Copy the database URL shown at the top (looks like
+   `https://<project-id>-default-rtdb.<region>.firebasedatabase.app`) into
+   `VITE_FIREBASE_DATABASE_URL` in both `.env.production` and `.env.local`.
+3. **Realtime Database → Rules**, replace with:
+   ```json
+   {
+     "rules": {
+       "status": {
+         ".read": true,
+         ".write": true
+       }
+     }
+   }
+   ```
+   and **Publish**. Same tradeoff as the Firestore rules below — open to
+   anyone with the app URL, scoped to just the `status` path.
 
 ## Architecture
 
