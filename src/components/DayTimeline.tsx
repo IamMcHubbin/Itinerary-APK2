@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
+import { StickyNote } from 'lucide-react'
 import type { Day } from '../types'
 import ActivityCard from './ActivityCard'
+import FoodOptions from './FoodOptions'
 
 interface DayTimelineProps {
   day: Day
@@ -37,6 +39,26 @@ export default function DayTimeline({ day }: DayTimelineProps) {
           />
         ))}
       </div>
+
+      {day.notes && day.notes.length > 0 && (
+        <div className="mb-8 space-y-2">
+          {day.notes.map((note) => (
+            <p
+              key={note}
+              className="flex gap-2 rounded-xl bg-sumi/5 px-3 py-2 text-xs text-sumi/60 dark:bg-white/5 dark:text-white/50"
+            >
+              <StickyNote size={14} className="mt-0.5 flex-none" />
+              {note}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {day.foodOptions && day.foodOptions.length > 0 && (
+        <div className="mb-8">
+          <FoodOptions options={day.foodOptions} />
+        </div>
+      )}
     </motion.div>
   )
 }
