@@ -4,6 +4,9 @@ import type { Trip } from '../types'
 import { useEditMode } from '../context/EditModeContext'
 import { useTripStore } from '../context/TripContext'
 import { firebaseConfigured } from '../lib/firebase'
+import { useDisplayName } from '../hooks/useDisplayName'
+import { usePresence } from '../hooks/usePresence'
+import PresenceAvatars from './PresenceAvatars'
 
 export type AppView = 'itinerary' | 'wishlist' | 'budget' | 'overview'
 
@@ -26,6 +29,8 @@ export default function TripHeader({ trip, dayIndex, view, onViewChange }: TripH
   const end = format(new Date(`${trip.endDate}T00:00:00`), 'MMM d, yyyy')
   const { editMode, toggle } = useEditMode()
   const { synced } = useTripStore()
+  const { name } = useDisplayName()
+  const peers = usePresence(name, view)
 
   return (
     <header className="relative overflow-hidden bg-ai text-washi">
@@ -36,6 +41,7 @@ export default function TripHeader({ trip, dayIndex, view, onViewChange }: TripH
             {trip.coverEmoji}
           </span>
           <div className="flex items-center gap-2">
+            <PresenceAvatars peers={peers} />
             {view === 'itinerary' && (
               <span className="rounded-full border border-washi/25 px-3 py-1 text-xs font-medium tracking-wide text-washi/80">
                 Day {dayIndex + 1} of {trip.days.length}
