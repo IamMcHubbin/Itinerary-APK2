@@ -57,6 +57,14 @@ export interface Day {
   notes?: string[]
 }
 
+export interface Comment {
+  id: string
+  activityId: string
+  author: string
+  text: string
+  createdAt: number
+}
+
 export interface Trip {
   title: string
   subtitle: string

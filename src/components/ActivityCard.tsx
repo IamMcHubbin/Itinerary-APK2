@@ -1,23 +1,31 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Lightbulb, MapPin, MoveRight, Star } from 'lucide-react'
-import type { Activity } from '../types'
+import { ChevronDown, Lightbulb, MapPin, MoveRight, Star, Trash2 } from 'lucide-react'
+import type { Activity, ActivityCategory } from '../types'
 import { categoryStyles } from '../lib/categoryStyles'
 import { formatTravelSegment } from '../lib/formatTravel'
+import { useEditMode } from '../context/EditModeContext'
+import { useTripStore } from '../context/TripContext'
 import MapEmbed from './MapEmbed'
+import EditableText from './EditableText'
+import CommentsThread from './CommentsThread'
 
 interface ActivityCardProps {
+  dayId: string
   activity: Activity
   isLast: boolean
 }
 
-export default function ActivityCard({ activity, isLast }: ActivityCardProps) {
+const categoryOptions = Object.entries(categoryStyles) as [ActivityCategory, { label: string }][]
+
+export default function ActivityCard({ dayId, activity, isLast }: ActivityCardProps) {
   const [open, setOpen] = useState(false)
+  const { editMode } = useEditMode()
+  const { updateActivity, deleteActivity } = useTripStore()
   const style = categoryStyles[activity.category]
   const Icon = style.icon
-  const expandable = Boolean(
-    activity.description || activity.map || activity.tip || activity.location,
-  )
+
+  const patch = (fields: Partial<Activity>) => updateActivity(dayId, activity.id, fields)
 
   return (
     <div className="flex gap-4">
@@ -38,22 +46,47 @@ export default function ActivityCard({ activity, isLast }: ActivityCardProps) {
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={() => expandable && setOpen((o) => !o)}
-          aria-expanded={open}
-          className={`flex w-full items-start justify-between gap-2 text-left ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
-        >
-          <div>
+        <div className="flex items-start justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="flex-1 cursor-pointer text-left"
+          >
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="font-serif text-sm text-sumi/50 dark:text-white/40">
-                {activity.time}
-              </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase ${style.chip}`}
-              >
-                {style.label}
-              </span>
+              {editMode ? (
+                <EditableText
+                  value={activity.time}
+                  onCommit={(time) => patch({ time })}
+                  className="w-16 font-serif text-sm text-sumi/50 dark:text-white/40"
+                />
+              ) : (
+                <span className="font-serif text-sm text-sumi/50 dark:text-white/40">
+                  {activity.time}
+                </span>
+              )}
+
+              {editMode ? (
+                <select
+                  value={activity.category}
+                  onChange={(e) => patch({ category: e.target.value as ActivityCategory })}
+                  onClick={(e) => e.stopPropagation()}
+                  className={`rounded-full border-none px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase ${style.chip}`}
+                >
+                  {categoryOptions.map(([value, opt]) => (
+                    <option key={value} value={value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase ${style.chip}`}
+                >
+                  {style.label}
+                </span>
+              )}
+
               {activity.rating && (
                 <span className="flex items-center gap-0.5 text-[10px] text-sumi/50 dark:text-white/40">
                   <Star size={10} fill="currentColor" className="text-gold" />
@@ -61,17 +94,43 @@ export default function ActivityCard({ activity, isLast }: ActivityCardProps) {
                 </span>
               )}
             </div>
-            <h3 className="mt-1 font-serif text-lg leading-snug text-sumi dark:text-white">
-              {activity.title}
-            </h3>
+
+            {editMode ? (
+              <EditableText
+                value={activity.title}
+                onCommit={(title) => patch({ title })}
+                className="mt-1 font-serif text-lg leading-snug text-sumi dark:text-white"
+              />
+            ) : (
+              <h3 className="mt-1 font-serif text-lg leading-snug text-sumi dark:text-white">
+                {activity.title}
+              </h3>
+            )}
+          </button>
+
+          <div className="mt-1 flex flex-none items-center gap-1">
+            {editMode && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(`Delete "${activity.title}"?`)) {
+                    deleteActivity(dayId, activity.id)
+                  }
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-full text-sumi/30 hover:bg-vermillion/10 hover:text-vermillion dark:text-white/30"
+                aria-label="Delete activity"
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+            <button type="button" onClick={() => setOpen((o) => !o)} aria-label="Toggle details">
+              <ChevronDown
+                size={18}
+                className={`text-sumi/30 transition-transform dark:text-white/30 ${open ? 'rotate-180' : ''}`}
+              />
+            </button>
           </div>
-          {expandable && (
-            <ChevronDown
-              size={18}
-              className={`mt-1 flex-none text-sumi/30 transition-transform dark:text-white/30 ${open ? 'rotate-180' : ''}`}
-            />
-          )}
-        </button>
+        </div>
 
         <AnimatePresence initial={false}>
           {open && (
@@ -83,10 +142,20 @@ export default function ActivityCard({ activity, isLast }: ActivityCardProps) {
               className="overflow-hidden"
             >
               <div className="pt-2">
-                {activity.description && (
-                  <p className="text-sm leading-relaxed text-sumi/70 dark:text-white/60">
-                    {activity.description}
-                  </p>
+                {editMode ? (
+                  <EditableText
+                    value={activity.description ?? ''}
+                    onCommit={(description) => patch({ description })}
+                    as="textarea"
+                    placeholder="Description…"
+                    className="text-sm leading-relaxed text-sumi/70 dark:text-white/60"
+                  />
+                ) : (
+                  activity.description && (
+                    <p className="text-sm leading-relaxed text-sumi/70 dark:text-white/60">
+                      {activity.description}
+                    </p>
+                  )
                 )}
 
                 {activity.location && (
@@ -96,14 +165,28 @@ export default function ActivityCard({ activity, isLast }: ActivityCardProps) {
                   </p>
                 )}
 
-                {activity.tip && (
+                {editMode ? (
                   <p className="mt-2 flex gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-3 py-2 text-xs text-gold dark:border-gold/30 dark:bg-gold/10">
                     <Lightbulb size={14} className="mt-0.5 flex-none" />
-                    <span className="text-sumi/70 dark:text-white/60">{activity.tip}</span>
+                    <EditableText
+                      value={activity.tip ?? ''}
+                      onCommit={(tip) => patch({ tip })}
+                      placeholder="Tip…"
+                      className="text-sumi/70 dark:text-white/60"
+                    />
                   </p>
+                ) : (
+                  activity.tip && (
+                    <p className="mt-2 flex gap-2 rounded-xl border border-dashed border-gold/40 bg-gold/5 px-3 py-2 text-xs text-gold dark:border-gold/30 dark:bg-gold/10">
+                      <Lightbulb size={14} className="mt-0.5 flex-none" />
+                      <span className="text-sumi/70 dark:text-white/60">{activity.tip}</span>
+                    </p>
+                  )
                 )}
 
                 {activity.map && <MapEmbed map={activity.map} />}
+
+                <CommentsThread activityId={activity.id} />
               </div>
             </motion.div>
           )}

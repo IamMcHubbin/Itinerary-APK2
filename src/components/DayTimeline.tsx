@@ -1,15 +1,22 @@
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
-import { StickyNote } from 'lucide-react'
+import { Plus, StickyNote, Trash2 } from 'lucide-react'
 import type { Day } from '../types'
 import ActivityCard from './ActivityCard'
+import EditableText from './EditableText'
 import FoodOptions from './FoodOptions'
+import { useEditMode } from '../context/EditModeContext'
+import { useTripStore } from '../context/TripContext'
 
 interface DayTimelineProps {
   day: Day
+  dayIndex: number
 }
 
-export default function DayTimeline({ day }: DayTimelineProps) {
+export default function DayTimeline({ day, dayIndex }: DayTimelineProps) {
+  const { editMode } = useEditMode()
+  const { updateDayField, addActivity, addDay, deleteDay } = useTripStore()
+
   return (
     <motion.div
       key={day.id}
@@ -21,24 +28,64 @@ export default function DayTimeline({ day }: DayTimelineProps) {
     >
       <div className="mb-6">
         <p className="text-xs font-medium tracking-widest text-gold uppercase">
-          {format(new Date(day.date), 'EEEE, MMMM d')}
+          {format(new Date(`${day.date}T00:00:00`), 'EEEE, MMMM d')}
         </p>
-        <h2 className="mt-1 font-serif text-2xl text-sumi dark:text-white">
-          {day.city}
-          {day.region && <span className="text-sumi/40 dark:text-white/30"> · {day.region}</span>}
-        </h2>
-        <p className="mt-1 text-sm text-sumi/60 dark:text-white/50">{day.summary}</p>
+
+        {editMode ? (
+          <div className="mt-1 space-y-1.5">
+            <EditableText
+              value={day.city}
+              onCommit={(city) => updateDayField(day.id, { city })}
+              placeholder="City"
+              className="font-serif text-2xl text-sumi dark:text-white"
+            />
+            <EditableText
+              value={day.region ?? ''}
+              onCommit={(region) => updateDayField(day.id, { region })}
+              placeholder="Region"
+              className="text-sm text-sumi/50 dark:text-white/40"
+            />
+            <EditableText
+              value={day.summary}
+              onCommit={(summary) => updateDayField(day.id, { summary })}
+              placeholder="Summary"
+              className="text-sm text-sumi/60 dark:text-white/50"
+            />
+          </div>
+        ) : (
+          <>
+            <h2 className="mt-1 font-serif text-2xl text-sumi dark:text-white">
+              {day.city}
+              {day.region && (
+                <span className="text-sumi/40 dark:text-white/30"> · {day.region}</span>
+              )}
+            </h2>
+            <p className="mt-1 text-sm text-sumi/60 dark:text-white/50">{day.summary}</p>
+          </>
+        )}
       </div>
 
       <div>
         {day.activities.map((activity, index) => (
           <ActivityCard
             key={activity.id}
+            dayId={day.id}
             activity={activity}
             isLast={index === day.activities.length - 1}
           />
         ))}
       </div>
+
+      {editMode && (
+        <button
+          type="button"
+          onClick={() => addActivity(day.id)}
+          className="mb-6 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-sumi/20 py-2.5 text-sm text-sumi/50 hover:border-ai hover:text-ai dark:border-white/15 dark:text-white/40 dark:hover:border-ai-light dark:hover:text-ai-light"
+        >
+          <Plus size={15} />
+          Add activity
+        </button>
+      )}
 
       {day.notes && day.notes.length > 0 && (
         <div className="mb-8 space-y-2">
@@ -57,6 +104,30 @@ export default function DayTimeline({ day }: DayTimelineProps) {
       {day.foodOptions && day.foodOptions.length > 0 && (
         <div className="mb-8">
           <FoodOptions options={day.foodOptions} />
+        </div>
+      )}
+
+      {editMode && (
+        <div className="mb-8 flex gap-2">
+          <button
+            type="button"
+            onClick={() => addDay(dayIndex)}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-dashed border-sumi/20 py-2.5 text-sm text-sumi/50 hover:border-ai hover:text-ai dark:border-white/15 dark:text-white/40 dark:hover:border-ai-light dark:hover:text-ai-light"
+          >
+            <Plus size={15} />
+            Insert day after
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm(`Delete Day ${dayIndex + 1} (${day.city})? This can't be undone.`)) {
+                deleteDay(day.id)
+              }
+            }}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-vermillion/30 px-3 py-2.5 text-sm text-vermillion/70 hover:border-vermillion hover:text-vermillion"
+          >
+            <Trash2 size={15} />
+          </button>
         </div>
       )}
     </motion.div>
