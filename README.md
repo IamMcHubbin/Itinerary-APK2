@@ -36,9 +36,6 @@ being planned and isn't in the app yet. The shape is defined in
 - `FoodOption` — a name, description, rating, and optional `map`, listed
   under each day's "Food options"
 
-Note: the dates in `tripData.ts` are placeholders until flights/hotels are
-booked — update `startDate`/`endDate` and each day's `date` once they're set.
-
 ### Map embeds
 
 Activity/food cards with a `map` show an embedded Google Map using a keyless
@@ -47,6 +44,12 @@ embed URL (`https://maps.google.com/maps?q=...&output=embed`, in
 trick that could stop working. If it does, swap `googleMapsEmbedUrl` for the
 official [Maps Embed API](https://developers.google.com/maps/documentation/embed/get-started)
 with a free key.
+
+The embed and the "Open in Google/Apple Maps" links all search by the
+place's `map.label` (name), not its raw coordinates — a bare lat/lng drops a
+generic pin with no reviews, hours, or photos attached, while searching the
+name resolves to the actual listing. `lat`/`lng` are still stored on `map`
+(handy for reference) but aren't used to build these links.
 
 ## Running locally
 
