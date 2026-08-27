@@ -1,27 +1,30 @@
 import type { Trip } from '../types'
 
-// Dates below are placeholders (flights/hotels not booked yet) — update
-// once real dates are set. Everything else (times, routes, ratings,
-// coordinates) is pulled from the trip planning notes.
+// Trip dates: Sun 13 Sep – Sun 27 Sep 2026. Days 9-15 (Week 2) aren't in
+// here yet — they're still being planned, so they're intentionally left
+// out rather than added as empty placeholders.
 export const trip: Trip = {
   title: 'Japan',
   subtitle: 'Tokyo · Hakone · Nikko',
-  startDate: '2026-10-10',
-  endDate: '2026-10-17',
+  startDate: '2026-09-13',
+  endDate: '2026-09-27',
   coverEmoji: '⛩️',
   days: [
     {
       id: 'day-1',
-      date: '2026-10-10',
+      date: '2026-09-13',
       city: 'Tokyo',
-      region: 'Narita → Shinjuku',
+      region: 'Haneda → Shinjuku',
       summary: 'Arrival & adjuster day — deliberately light',
-      notes: ['Deliberately unstructured — no bookings needed today.'],
+      notes: [
+        'Deliberately unstructured — no bookings needed today.',
+        'Standing food list — no planning needed, grab as you go: yakisoba (festival stalls / food courts), 7-Eleven onigiri (grab fresh in the morning), Pocari Sweat (any conbini), yakitori (Golden Gai, Day 4).',
+      ],
       activities: [
         {
           id: 'd1-1',
           time: '06:30',
-          title: 'Land at Narita',
+          title: 'Land at Haneda',
           category: 'transport',
           description:
             'Immigration, baggage, and the airport transfer to Shinjuku — allow 60-90 min.',
@@ -73,11 +76,19 @@ export const trip: Trip = {
           rating: 4.1,
           map: { lat: 35.6947761, lng: 139.7024133, label: 'Shinjuku Hikeshi Gyoza' },
         },
+        {
+          id: 'd1-f4',
+          name: 'Ichiran Ramen (Shinjuku Station East Exit)',
+          description:
+            '24hrs, no reservation, solo booths, customizable broth/spice — good low-effort first dinner.',
+          rating: 4.3,
+          map: { lat: 35.6905859, lng: 139.7028052, label: 'Ichiran Shinjuku' },
+        },
       ],
     },
     {
       id: 'day-2',
-      date: '2026-10-11',
+      date: '2026-09-14',
       city: 'Tokyo',
       region: 'Asakusa & Akihabara',
       summary: 'Old Tokyo meets electric town, sunset at Skytree',
@@ -165,7 +176,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-3',
-      date: '2026-10-12',
+      date: '2026-09-15',
       city: 'Tokyo',
       region: 'Tsukiji, Toyosu & Odaiba',
       summary: 'Early market run, digital art, waterfront',
@@ -228,7 +239,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-4',
-      date: '2026-10-13',
+      date: '2026-09-16',
       city: 'Tokyo',
       region: 'Shibuya & Shinjuku',
       summary: 'Crossings, digital art at Azabudai Hills, Golden Gai',
@@ -290,11 +301,25 @@ export const trip: Trip = {
           rating: 4.9,
           map: { lat: 35.6946198, lng: 139.7005769, label: 'Gyukatsu Motomura Shinjuku' },
         },
+        {
+          id: 'd4-f5',
+          name: 'Himawari Sushi Shintoshin',
+          description: 'Genuine local go-to conveyor-belt sushi, English menu, cash only.',
+          rating: 4.3,
+          map: { lat: 35.6889788, lng: 139.6975038, label: 'Himawari Sushi Shintoshin' },
+        },
+        {
+          id: 'd4-f6',
+          name: 'Satoumisatoyama Tempura (Kabukicho)',
+          description: "Chef's-choice lunch sets, light not greasy.",
+          rating: 4.8,
+          map: { lat: 35.6971021, lng: 139.7034094, label: 'Satoumisatoyama Tempura' },
+        },
       ],
     },
     {
       id: 'day-5',
-      date: '2026-10-14',
+      date: '2026-09-17',
       city: 'Mitake',
       region: 'Day trip',
       summary: 'Gorge climbing and bouldering',
@@ -326,7 +351,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-6',
-      date: '2026-10-15',
+      date: '2026-09-18',
       city: 'Hakone',
       region: 'Day trip',
       summary: 'Volcanic valley, lake cruise, Mt Fuji views',
@@ -396,7 +421,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-7',
-      date: '2026-10-16',
+      date: '2026-09-19',
       city: 'Nikko',
       region: 'Day trip',
       summary: 'Shrines, waterfalls, mountain roads',
@@ -463,7 +488,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-8',
-      date: '2026-10-17',
+      date: '2026-09-20',
       city: 'Tokyo',
       region: 'Ginza',
       summary: 'Last shopping, pack up',
@@ -505,6 +530,21 @@ export const trip: Trip = {
           description: 'Yakitori/izakaya, GINZA SIX B1. Book ahead.',
           rating: 4.8,
           map: { lat: 35.6717759, lng: 139.7604117, label: 'Bistro Fukumimi' },
+        },
+        {
+          id: 'd8-f4',
+          name: 'Ginza Akebono',
+          description: 'Fresh seasonal daifuku/mochi, real craftsmanship.',
+          rating: 4.4,
+          map: { lat: 35.6714099, lng: 139.7645218, label: 'Ginza Akebono' },
+        },
+        {
+          id: 'd8-f5',
+          name: 'Nobunaga Ramen',
+          description:
+            'Short hop to Nihonbashi — genuine local favorite, not a tourist queue, rich broth, ~¥1200.',
+          rating: 4.8,
+          map: { lat: 35.6792485, lng: 139.7799594, label: 'Nobunaga Ramen' },
         },
       ],
     },
