@@ -19,7 +19,10 @@ automatically via GitHub Actions on every push — see
   on any stop; changes sync to everyone else's device in real time
 - **Wishlist** — a shared, categorized (Lodging/Sightseeing/Food) list of
   things people want to do, separate from the confirmed itinerary; check an
-  item off once it's actually been planned
+  item off once it's actually been planned, and favorite personal stand-outs
+- **Weather** — each day shows a forecast once it's close enough (within
+  ~15 days), or last year's actual weather on that date as a rough reference
+  further out — no API key needed
 - Swipe/tap between days with a sticky day picker
 - Installable to an Android or iOS home screen, works offline
 - Light and dark mode, tuned for both
@@ -82,6 +85,20 @@ place's `map.label` (name), not its raw coordinates — a bare lat/lng drops a
 generic pin with no reviews, hours, or photos attached, while searching the
 name resolves to the actual listing. `lat`/`lng` are still stored on `map`
 (handy for reference) but aren't used to build these links.
+
+### Weather
+
+`src/lib/weather.ts` calls [Open-Meteo](https://open-meteo.com/) — free,
+keyless, no billing. For each day it picks a location (the first activity
+with a `map`, falling back to `src/lib/cityCoordinates.ts`) and:
+
+- If the date is within ~15 days out, fetches the real forecast.
+- Otherwise, fetches last year's actual weather on that same calendar date
+  as a "here's roughly what to expect" reference, clearly labeled as such.
+
+Results are cached in memory for 3 hours per location+date. As the trip gets
+closer, days automatically flip from the historical reference to a real
+forecast — no code changes needed.
 
 ## Architecture
 
