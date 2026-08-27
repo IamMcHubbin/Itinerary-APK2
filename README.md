@@ -124,6 +124,13 @@ service cloud.firestore {
 - **Seeding**: `scripts/seedFirestore.ts` pushes `tripData.ts` into Firestore
   once, as the starting point — `node --env-file=.env.local ./node_modules/.bin/tsx scripts/seedFirestore.ts`.
   It won't overwrite an existing document.
+- **Wishlist from itinerary**: `scripts/populateWishlistFromItinerary.ts`
+  fills the Wishlist tab from what's already planned — every scheduled
+  activity (except pure transport legs) becomes a "planned" wishlist item
+  linked to its day, and each day's food *options* become "open" food
+  wishlist items. Reads the *live* trip document, uses deterministic IDs, and
+  never touches items people added by hand — safe to re-run any time the
+  itinerary changes: `node --env-file=.env.local ./node_modules/.bin/tsx scripts/populateWishlistFromItinerary.ts`.
 - If Firebase env vars aren't set (e.g. a fork without its own project), the
   app still works read-only from the local `tripData.ts` seed — the "Edit"
   button and Live/Connecting indicator only appear once actually connected.
