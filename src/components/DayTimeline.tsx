@@ -32,21 +32,19 @@ export default function DayTimeline({ day, dayIndex }: DayTimelineProps) {
         </p>
 
         {editMode ? (
-          <div className="mt-1 space-y-1">
-            <div className="flex items-baseline gap-2 font-serif text-2xl text-sumi dark:text-white">
-              <EditableText
-                value={day.city}
-                onCommit={(city) => updateDayField(day.id, { city })}
-                className="font-serif text-2xl"
-              />
-              <span className="text-sumi/40 dark:text-white/30">·</span>
-              <EditableText
-                value={day.region ?? ''}
-                onCommit={(region) => updateDayField(day.id, { region })}
-                placeholder="Region"
-                className="font-serif text-2xl text-sumi/40 dark:text-white/30"
-              />
-            </div>
+          <div className="mt-1 space-y-1.5">
+            <EditableText
+              value={day.city}
+              onCommit={(city) => updateDayField(day.id, { city })}
+              placeholder="City"
+              className="font-serif text-2xl text-sumi dark:text-white"
+            />
+            <EditableText
+              value={day.region ?? ''}
+              onCommit={(region) => updateDayField(day.id, { region })}
+              placeholder="Region"
+              className="text-sm text-sumi/50 dark:text-white/40"
+            />
             <EditableText
               value={day.summary}
               onCommit={(summary) => updateDayField(day.id, { summary })}

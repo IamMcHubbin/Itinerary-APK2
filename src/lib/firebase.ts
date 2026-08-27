@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,7 +14,12 @@ export const firebaseConfigured = Boolean(firebaseConfig.apiKey && firebaseConfi
 
 const app = firebaseConfigured ? initializeApp(firebaseConfig) : null
 
-export const db = app ? getFirestore(app) : null
+// Auto-detect long-polling instead of always assuming Firestore's normal
+// streaming connection works — some networks (corporate proxies, certain
+// mobile carriers/VPNs) block that, and this falls back transparently.
+export const db = app
+  ? initializeFirestore(app, { experimentalAutoDetectLongPolling: true })
+  : null
 
 /** Single shared document holding the whole trip. */
 export const TRIP_ID = 'japan-2026'
