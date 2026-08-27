@@ -65,6 +65,20 @@ export interface Comment {
   createdAt: number
 }
 
+export type WishlistCategory = 'lodging' | 'sightseeing' | 'food'
+
+export interface WishlistItem {
+  id: string
+  category: WishlistCategory
+  title: string
+  notes?: string
+  addedBy: string
+  createdAt: number
+  planned: boolean
+  /** Which day this ended up on, once planned — for context, not required. */
+  linkedDayId?: string
+}
+
 export interface Trip {
   title: string
   subtitle: string

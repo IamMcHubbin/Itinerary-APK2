@@ -1,16 +1,20 @@
 import { format } from 'date-fns'
-import { Pencil, Check } from 'lucide-react'
+import { Pencil, Check, MapPinned, ListTodo } from 'lucide-react'
 import type { Trip } from '../types'
 import { useEditMode } from '../context/EditModeContext'
 import { useTripStore } from '../context/TripContext'
 import { firebaseConfigured } from '../lib/firebase'
 
+export type AppView = 'itinerary' | 'wishlist'
+
 interface TripHeaderProps {
   trip: Trip
   dayIndex: number
+  view: AppView
+  onViewChange: (view: AppView) => void
 }
 
-export default function TripHeader({ trip, dayIndex }: TripHeaderProps) {
+export default function TripHeader({ trip, dayIndex, view, onViewChange }: TripHeaderProps) {
   const start = format(new Date(`${trip.startDate}T00:00:00`), 'MMM d')
   const end = format(new Date(`${trip.endDate}T00:00:00`), 'MMM d, yyyy')
   const { editMode, toggle } = useEditMode()
@@ -25,10 +29,12 @@ export default function TripHeader({ trip, dayIndex }: TripHeaderProps) {
             {trip.coverEmoji}
           </span>
           <div className="flex items-center gap-2">
-            <span className="rounded-full border border-washi/25 px-3 py-1 text-xs font-medium tracking-wide text-washi/80">
-              Day {dayIndex + 1} of {trip.days.length}
-            </span>
-            {firebaseConfigured && synced && (
+            {view === 'itinerary' && (
+              <span className="rounded-full border border-washi/25 px-3 py-1 text-xs font-medium tracking-wide text-washi/80">
+                Day {dayIndex + 1} of {trip.days.length}
+              </span>
+            )}
+            {view === 'itinerary' && firebaseConfigured && synced && (
               <button
                 type="button"
                 onClick={toggle}
@@ -56,6 +62,29 @@ export default function TripHeader({ trip, dayIndex }: TripHeaderProps) {
               {synced ? 'Live' : 'Connecting…'}
             </span>
           )}
+        </div>
+
+        <div className="mt-4 flex gap-1 rounded-full bg-washi/10 p-1">
+          <button
+            type="button"
+            onClick={() => onViewChange('itinerary')}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-xs font-medium transition-colors ${
+              view === 'itinerary' ? 'bg-washi text-ai' : 'text-washi/70'
+            }`}
+          >
+            <MapPinned size={13} />
+            Itinerary
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewChange('wishlist')}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-xs font-medium transition-colors ${
+              view === 'wishlist' ? 'bg-washi text-ai' : 'text-washi/70'
+            }`}
+          >
+            <ListTodo size={13} />
+            Wishlist
+          </button>
         </div>
       </div>
     </header>

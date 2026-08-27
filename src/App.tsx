@@ -2,16 +2,20 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import TripHeader from './components/TripHeader'
+import type { AppView } from './components/TripHeader'
 import DaySelector from './components/DaySelector'
 import DayTimeline from './components/DayTimeline'
+import WishlistPage from './components/WishlistPage'
 import { TripProvider, useTripStore } from './context/TripContext'
 import { EditModeProvider, useEditMode } from './context/EditModeContext'
 import { CommentsProvider } from './context/CommentsContext'
+import { WishlistProvider } from './context/WishlistContext'
 
 function AppShell() {
   const { trip, addDay } = useTripStore()
   const { editMode } = useEditMode()
   const [dayIndex, setDayIndex] = useState(0)
+  const [view, setView] = useState<AppView>('itinerary')
 
   useEffect(() => {
     if (dayIndex > trip.days.length - 1) {
@@ -25,17 +29,20 @@ function AppShell() {
   }
 
   const day = trip.days[dayIndex]
+  const showItineraryNav = view === 'itinerary' && Boolean(day)
 
   return (
     <div className="min-h-svh bg-washi dark:bg-ink">
-      <TripHeader trip={trip} dayIndex={dayIndex} />
+      <TripHeader trip={trip} dayIndex={dayIndex} view={view} onViewChange={setView} />
 
-      {trip.days.length > 0 && (
+      {view === 'itinerary' && trip.days.length > 0 && (
         <DaySelector days={trip.days} activeIndex={dayIndex} onSelect={goTo} />
       )}
 
       <main className="pb-24">
-        {day ? (
+        {view === 'wishlist' ? (
+          <WishlistPage />
+        ) : day ? (
           <AnimatePresence mode="wait">
             <DayTimeline key={day.id} day={day} dayIndex={dayIndex} />
           </AnimatePresence>
@@ -59,7 +66,7 @@ function AppShell() {
         )}
       </main>
 
-      {day && (
+      {showItineraryNav && (
         <nav className="fixed inset-x-0 bottom-0 border-t border-sumi/10 bg-washi/95 backdrop-blur dark:border-white/10 dark:bg-ink/95">
           <div className="mx-auto flex max-w-xl items-center justify-between px-4 py-3 sm:px-6">
             <button
@@ -72,7 +79,7 @@ function AppShell() {
               Prev
             </button>
             <span className="font-serif text-sm text-sumi/50 dark:text-white/40">
-              {day.city} — Day {dayIndex + 1}
+              {day!.city} — Day {dayIndex + 1}
             </span>
             <button
               type="button"
@@ -95,7 +102,9 @@ export default function App() {
     <TripProvider>
       <EditModeProvider>
         <CommentsProvider>
-          <AppShell />
+          <WishlistProvider>
+            <AppShell />
+          </WishlistProvider>
         </CommentsProvider>
       </EditModeProvider>
     </TripProvider>
