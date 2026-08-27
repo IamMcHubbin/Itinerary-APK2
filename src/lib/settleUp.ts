@@ -1,68 +1,91 @@
-import type { Expense } from '../types'
+import type { Currency, Expense } from '../types'
+import { roundForCurrency } from './formatCurrency'
 
 export interface Balance {
   name: string
+  currency: Currency
   /** Positive: they're owed money. Negative: they owe money. */
-  netJPY: number
+  net: number
 }
 
 export interface Settlement {
   from: string
   to: string
-  amountJPY: number
+  currency: Currency
+  amount: number
+}
+
+function balanceKey(name: string, currency: Currency): string {
+  return `${currency}|${name}`
 }
 
 export function computeBalances(expenses: Expense[]): Balance[] {
   const net = new Map<string, number>()
-  const touch = (name: string) => {
-    if (!net.has(name)) net.set(name, 0)
+  const touch = (key: string) => {
+    if (!net.has(key)) net.set(key, 0)
   }
 
   for (const expense of expenses) {
     if (expense.splitBetween.length === 0) continue
-    touch(expense.paidBy)
-    const share = expense.amountJPY / expense.splitBetween.length
-    net.set(expense.paidBy, (net.get(expense.paidBy) ?? 0) + expense.amountJPY)
+    const payerKey = balanceKey(expense.paidBy, expense.currency)
+    touch(payerKey)
+    net.set(payerKey, (net.get(payerKey) ?? 0) + expense.amount)
+
+    const share = expense.amount / expense.splitBetween.length
     for (const person of expense.splitBetween) {
-      touch(person)
-      net.set(person, (net.get(person) ?? 0) - share)
+      const key = balanceKey(person, expense.currency)
+      touch(key)
+      net.set(key, (net.get(key) ?? 0) - share)
     }
   }
 
   return Array.from(net.entries())
-    .map(([name, netJPY]) => ({ name, netJPY: Math.round(netJPY) }))
-    .sort((a, b) => b.netJPY - a.netJPY)
+    .map(([key, value]) => {
+      const [currency, name] = key.split('|') as [Currency, string]
+      return { name, currency, net: roundForCurrency(value, currency) }
+    })
+    .sort((a, b) => b.net - a.net)
 }
 
 /**
- * Greedy settle-up: repeatedly pay the biggest creditor from the biggest
- * debtor. Not always the mathematically minimal transaction count, but
- * very close, simple, and exactly how Splitwise itself behaves.
+ * Greedy settle-up per currency: repeatedly pay the biggest creditor from the
+ * biggest debtor. Not always the mathematically minimal transaction count,
+ * but very close, simple, and exactly how Splitwise itself behaves.
  */
 export function computeSettlements(balances: Balance[]): Settlement[] {
-  const creditors = balances
-    .filter((b) => b.netJPY > 0)
-    .map((b) => ({ ...b }))
-    .sort((a, b) => b.netJPY - a.netJPY)
-  const debtors = balances
-    .filter((b) => b.netJPY < 0)
-    .map((b) => ({ name: b.name, netJPY: -b.netJPY }))
-    .sort((a, b) => b.netJPY - a.netJPY)
-
+  const currencies = Array.from(new Set(balances.map((b) => b.currency)))
   const settlements: Settlement[] = []
-  let i = 0
-  let j = 0
-  while (i < creditors.length && j < debtors.length) {
-    const creditor = creditors[i]
-    const debtor = debtors[j]
-    const amount = Math.min(creditor.netJPY, debtor.netJPY)
-    if (amount > 0) {
-      settlements.push({ from: debtor.name, to: creditor.name, amountJPY: Math.round(amount) })
+
+  for (const currency of currencies) {
+    const subset = balances.filter((b) => b.currency === currency)
+    const creditors = subset
+      .filter((b) => b.net > 0)
+      .map((b) => ({ ...b }))
+      .sort((a, b) => b.net - a.net)
+    const debtors = subset
+      .filter((b) => b.net < 0)
+      .map((b) => ({ name: b.name, net: -b.net }))
+      .sort((a, b) => b.net - a.net)
+
+    let i = 0
+    let j = 0
+    while (i < creditors.length && j < debtors.length) {
+      const creditor = creditors[i]
+      const debtor = debtors[j]
+      const amount = Math.min(creditor.net, debtor.net)
+      if (amount > 0) {
+        settlements.push({
+          from: debtor.name,
+          to: creditor.name,
+          currency,
+          amount: roundForCurrency(amount, currency),
+        })
+      }
+      creditor.net -= amount
+      debtor.net -= amount
+      if (creditor.net <= 0) i++
+      if (debtor.net <= 0) j++
     }
-    creditor.netJPY -= amount
-    debtor.netJPY -= amount
-    if (creditor.netJPY <= 0) i++
-    if (debtor.netJPY <= 0) j++
   }
 
   return settlements

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore'
+import { arrayUnion, doc, onSnapshot, updateDoc } from 'firebase/firestore'
 import { db, TRIP_ID, firebaseConfigured } from '../lib/firebase'
 import { trip as seedTrip } from '../data/tripData'
 import { recomputeDates } from '../lib/recomputeDates'
@@ -18,6 +18,8 @@ export interface UseTripResult {
   addActivity: (dayId: string) => string
   updateActivity: (dayId: string, activityId: string, patch: Partial<Activity>) => void
   deleteActivity: (dayId: string, activityId: string) => void
+  /** Adds names to the trip's running list of Budget participants (never removes any). */
+  addBudgetParticipants: (names: string[]) => void
 }
 
 function emptyDay(): Day {
@@ -156,6 +158,18 @@ export function useTrip(): UseTripResult {
     [applyDays],
   )
 
+  const addBudgetParticipants = useCallback((names: string[]) => {
+    const trimmed = Array.from(new Set(names.map((n) => n.trim()).filter(Boolean)))
+    if (!db || trimmed.length === 0) return
+    setTrip((current) => ({
+      ...current,
+      budgetParticipants: Array.from(new Set([...(current.budgetParticipants ?? []), ...trimmed])),
+    }))
+    updateDoc(doc(db, 'trips', TRIP_ID), { budgetParticipants: arrayUnion(...trimmed) }).catch(
+      (error) => console.error('Failed to save budget participants', error),
+    )
+  }, [])
+
   return {
     trip,
     loading,
@@ -167,5 +181,6 @@ export function useTrip(): UseTripResult {
     addActivity,
     updateActivity,
     deleteActivity,
+    addBudgetParticipants,
   }
 }

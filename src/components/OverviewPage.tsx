@@ -6,7 +6,7 @@ import { useWishlist } from '../context/WishlistContext'
 import { useBudget } from '../context/BudgetContext'
 import { categoryStyles } from '../lib/categoryStyles'
 import { cityAccent } from '../lib/cityAccent'
-import { formatYen } from '../lib/formatYen'
+import { formatTotals, totalsByCurrency } from '../lib/formatCurrency'
 import WeatherBadge from './WeatherBadge'
 
 interface OverviewPageProps {
@@ -28,13 +28,13 @@ export default function OverviewPage({ onJumpToDay }: OverviewPageProps) {
 
   const totalActivities = trip.days.reduce((sum, d) => sum + d.activities.length, 0)
   const plannedWishlistCount = wishlistItems.filter((i) => i.planned).length
-  const totalSpent = expenses.reduce((sum, e) => sum + e.amountJPY, 0)
+  const totalSpent = formatTotals(totalsByCurrency(expenses))
 
   const stats = [
     { icon: CalendarDays, value: trip.days.length, label: 'days planned' },
     { icon: Compass, value: totalActivities, label: 'activities' },
     { icon: ListChecks, value: plannedWishlistCount, label: 'wishlist items locked in' },
-    { icon: Wallet, value: formatYen(totalSpent), label: 'spent so far' },
+    { icon: Wallet, value: totalSpent, label: 'spent so far' },
   ]
 
   return (
