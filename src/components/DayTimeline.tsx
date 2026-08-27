@@ -5,6 +5,7 @@ import type { Day } from '../types'
 import ActivityCard from './ActivityCard'
 import EditableText from './EditableText'
 import FoodOptions from './FoodOptions'
+import WeatherBadge from './WeatherBadge'
 import { useEditMode } from '../context/EditModeContext'
 import { useTripStore } from '../context/TripContext'
 
@@ -27,9 +28,12 @@ export default function DayTimeline({ day, dayIndex }: DayTimelineProps) {
       className="mx-auto max-w-xl px-4 pt-6 sm:px-6"
     >
       <div className="mb-6">
-        <p className="text-xs font-medium tracking-widest text-gold uppercase">
-          {format(new Date(`${day.date}T00:00:00`), 'EEEE, MMMM d')}
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium tracking-widest text-gold uppercase">
+            {format(new Date(`${day.date}T00:00:00`), 'EEEE, MMMM d')}
+          </p>
+          {!editMode && <WeatherBadge day={day} />}
+        </div>
 
         {editMode ? (
           <div className="mt-1 space-y-1.5">
