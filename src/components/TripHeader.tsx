@@ -1,11 +1,11 @@
 import { format } from 'date-fns'
-import { Pencil, Check, MapPinned, ListTodo, Wallet } from 'lucide-react'
+import { Pencil, Check, MapPinned, ListTodo, Wallet, Route } from 'lucide-react'
 import type { Trip } from '../types'
 import { useEditMode } from '../context/EditModeContext'
 import { useTripStore } from '../context/TripContext'
 import { firebaseConfigured } from '../lib/firebase'
 
-export type AppView = 'itinerary' | 'wishlist' | 'budget'
+export type AppView = 'itinerary' | 'wishlist' | 'budget' | 'overview'
 
 interface TripHeaderProps {
   trip: Trip
@@ -16,6 +16,7 @@ interface TripHeaderProps {
 
 const tabs: { id: AppView; label: string; icon: typeof MapPinned }[] = [
   { id: 'itinerary', label: 'Itinerary', icon: MapPinned },
+  { id: 'overview', label: 'Overview', icon: Route },
   { id: 'wishlist', label: 'Wishlist', icon: ListTodo },
   { id: 'budget', label: 'Budget', icon: Wallet },
 ]
@@ -79,11 +80,11 @@ export default function TripHeader({ trip, dayIndex, view, onViewChange }: TripH
                 key={tab.id}
                 type="button"
                 onClick={() => onViewChange(tab.id)}
-                className={`flex flex-1 flex-none items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
+                className={`flex flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-[11px] font-medium whitespace-nowrap transition-colors ${
                   active ? 'bg-washi text-ai' : 'text-washi/70'
                 }`}
               >
-                <Icon size={13} />
+                <Icon size={12} className="flex-none" />
                 {tab.label}
               </button>
             )

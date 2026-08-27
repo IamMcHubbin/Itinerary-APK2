@@ -26,6 +26,8 @@ automatically via GitHub Actions on every push — see
 - **Budget** — a shared, Splitwise-style expense tracker: log what's spent
   and who it's split between, see running balances, and get minimal
   "who owes who" settle-up suggestions
+- **Overview** — every day at a glance as a color-coded route map, with
+  trip-wide stats and tap-to-jump navigation into any day
 - Swipe/tap between days with a sticky day picker
 - Installable to an Android or iOS home screen, works offline
 - Light and dark mode, tuned for both
