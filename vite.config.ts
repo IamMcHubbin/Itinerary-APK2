@@ -38,6 +38,12 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        // Belt-and-braces: make sure an installed PWA picks up a new
+        // deploy on its very next visit instead of serving a stale
+        // cached version until the old service worker happens to cycle.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
       },
     }),
   ],
