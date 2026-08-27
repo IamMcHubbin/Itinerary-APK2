@@ -1,35 +1,50 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Plus, Scale, HandCoins } from 'lucide-react'
 import { useBudget } from '../context/BudgetContext'
+import { useTripStore } from '../context/TripContext'
 import { useDisplayName } from '../hooks/useDisplayName'
-import { formatYen } from '../lib/formatYen'
+import { formatCurrency, formatTotals, totalsByCurrency } from '../lib/formatCurrency'
 import { computeBalances, computeSettlements } from '../lib/settleUp'
+import type { Currency } from '../types'
 import ExpenseRow from './ExpenseRow'
 
 const inputClassName =
   'w-full rounded-lg border border-sumi/15 bg-transparent px-3 py-1.5 text-sm text-sumi placeholder:text-sumi/40 focus:border-ai focus:outline-none dark:border-white/15 dark:text-white dark:placeholder:text-white/30 dark:focus:border-ai-light'
 
+const currencies: { code: Currency; symbol: string }[] = [
+  { code: 'JPY', symbol: '¥' },
+  { code: 'GBP', symbol: '£' },
+]
+
 export default function BudgetPage() {
   const { expenses, addExpense } = useBudget()
+  const { trip, addBudgetParticipants } = useTripStore()
   const { name } = useDisplayName()
 
+  // Everyone who's ever paid or split an expense — persisted on the trip
+  // doc so both people see each other here even before either logs one.
+  useEffect(() => {
+    if (name) addBudgetParticipants([name])
+  }, [name, addBudgetParticipants])
+
   const knownNames = useMemo(() => {
-    const names = new Set<string>()
+    const names = new Set<string>(trip.budgetParticipants ?? [])
     if (name) names.add(name)
     for (const expense of expenses) {
       names.add(expense.paidBy)
       for (const person of expense.splitBetween) names.add(person)
     }
     return Array.from(names).sort()
-  }, [expenses, name])
+  }, [expenses, name, trip.budgetParticipants])
 
   const balances = useMemo(() => computeBalances(expenses), [expenses])
   const settlements = useMemo(() => computeSettlements(balances), [balances])
-  const total = expenses.reduce((sum, e) => sum + e.amountJPY, 0)
+  const total = formatTotals(totalsByCurrency(expenses))
 
   const [showForm, setShowForm] = useState(false)
   const [titleDraft, setTitleDraft] = useState('')
   const [amountDraft, setAmountDraft] = useState('')
+  const [currencyDraft, setCurrencyDraft] = useState<Currency>('JPY')
   const [paidByDraft, setPaidByDraft] = useState(name ?? '')
   const [newPersonDraft, setNewPersonDraft] = useState('')
   const [extraPeople, setExtraPeople] = useState<string[]>([])
@@ -60,6 +75,7 @@ export default function BudgetPage() {
   const resetForm = () => {
     setTitleDraft('')
     setAmountDraft('')
+    setCurrencyDraft('JPY')
     setPaidByDraft(name ?? '')
     setExtraPeople([])
     setSplitWith(new Set(knownNames))
@@ -72,7 +88,8 @@ export default function BudgetPage() {
     const paidBy = paidByDraft.trim()
     const split = Array.from(splitWith)
     if (!title || !amount || amount <= 0 || !paidBy || split.length === 0) return
-    addExpense(title, amount, paidBy, split)
+    addExpense(title, amount, currencyDraft, paidBy, split)
+    addBudgetParticipants([paidBy, ...split])
     resetForm()
   }
 
@@ -86,7 +103,7 @@ export default function BudgetPage() {
 
       <div className="mb-6 rounded-2xl bg-ai px-5 py-4 text-washi">
         <p className="text-xs font-medium tracking-widest text-washi/60 uppercase">Total spent</p>
-        <p className="mt-1 font-serif text-3xl">{formatYen(total)}</p>
+        <p className="mt-1 font-serif text-3xl">{total}</p>
         <p className="mt-1 text-xs text-washi/60">
           {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'}
         </p>
@@ -101,21 +118,21 @@ export default function BudgetPage() {
           <div className="space-y-1.5">
             {balances.map((b) => (
               <div
-                key={b.name}
+                key={`${b.name}-${b.currency}`}
                 className="flex items-center justify-between rounded-xl bg-sumi/5 px-3 py-2 text-sm dark:bg-white/5"
               >
                 <span className="text-sumi dark:text-white">{b.name}</span>
                 <span
                   className={
-                    b.netJPY > 0
+                    b.net > 0
                       ? 'text-emerald-600 dark:text-emerald-400'
-                      : b.netJPY < 0
+                      : b.net < 0
                         ? 'text-vermillion'
                         : 'text-sumi/40 dark:text-white/30'
                   }
                 >
-                  {b.netJPY > 0 ? '+' : ''}
-                  {formatYen(b.netJPY)}
+                  {b.net > 0 ? '+' : ''}
+                  {formatCurrency(b.net, b.currency)}
                 </span>
               </div>
             ))}
@@ -136,7 +153,7 @@ export default function BudgetPage() {
                 className="rounded-xl border border-dashed border-gold/40 bg-gold/5 px-3 py-2 text-sm text-sumi/80 dark:border-gold/30 dark:bg-gold/10 dark:text-white/70"
               >
                 <span className="font-medium">{s.from}</span> owes{' '}
-                <span className="font-medium">{s.to}</span> {formatYen(s.amountJPY)}
+                <span className="font-medium">{s.to}</span> {formatCurrency(s.amount, s.currency)}
               </p>
             ))}
           </div>
@@ -152,13 +169,31 @@ export default function BudgetPage() {
             className={inputClassName}
             autoFocus
           />
-          <input
-            value={amountDraft}
-            onChange={(e) => setAmountDraft(e.target.value.replace(/[^0-9]/g, ''))}
-            placeholder="Amount (¥)"
-            inputMode="numeric"
-            className={inputClassName}
-          />
+          <div className="flex items-center gap-1.5">
+            <input
+              value={amountDraft}
+              onChange={(e) => setAmountDraft(e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="Amount"
+              inputMode="decimal"
+              className={inputClassName}
+            />
+            <div className="flex flex-none rounded-lg border border-sumi/15 p-0.5 dark:border-white/15">
+              {currencies.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => setCurrencyDraft(c.code)}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                    currencyDraft === c.code
+                      ? 'bg-ai text-washi dark:bg-ai-light'
+                      : 'text-sumi/50 dark:text-white/40'
+                  }`}
+                >
+                  {c.symbol} {c.code}
+                </button>
+              ))}
+            </div>
+          </div>
           <input
             value={paidByDraft}
             onChange={(e) => setPaidByDraft(e.target.value)}

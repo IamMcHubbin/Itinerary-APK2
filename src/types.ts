@@ -81,11 +81,13 @@ export interface WishlistItem {
   favoritedBy?: string[]
 }
 
+export type Currency = 'JPY' | 'GBP'
+
 export interface Expense {
   id: string
   title: string
-  /** Always JPY — the trip currency. */
-  amountJPY: number
+  amount: number
+  currency: Currency
   paidBy: string
   /** Names sharing this expense equally. */
   splitBetween: string[]
@@ -99,4 +101,6 @@ export interface Trip {
   endDate: string
   coverEmoji: string
   days: Day[]
+  /** Everyone who's ever paid or split a Budget expense — grows over time, never shrinks. */
+  budgetParticipants?: string[]
 }

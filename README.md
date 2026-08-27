@@ -23,9 +23,9 @@ automatically via GitHub Actions on every push — see
 - **Weather** — each day shows a forecast once it's close enough (within
   ~15 days), or last year's actual weather on that date as a rough reference
   further out — no API key needed
-- **Budget** — a shared, Splitwise-style expense tracker: log what's spent
-  and who it's split between, see running balances, and get minimal
-  "who owes who" settle-up suggestions
+- **Budget** — a shared, Splitwise-style expense tracker for the two of you:
+  log what's spent in ¥ or £, see running balances per currency, and get
+  minimal "who owes who" settle-up suggestions
 - **Overview** — every day at a glance as a color-coded route map, with
   trip-wide stats and tap-to-jump navigation into any day
 - **Presence avatars** — a little colored, initialed circle in the header for
@@ -57,12 +57,18 @@ across everyone viewing the app (see [Architecture](#architecture) below).
   rather than auto-matched against activities. Tap the heart on any item to
   favorite it — everyone's favorites show by name, and favorited items sort
   toward the top of their section, so personal stand-outs are easy to spot.
-- **Budget tab**: log an expense with a title, amount (¥), who paid, and who
-  it's split between (equal shares; type a new name to add someone not seen
-  yet). Shows a running balance per person and minimal settle-up suggestions
-  ("Alex owes Sam ¥11,500") computed by greedily paying the biggest debtor
-  from the biggest creditor — same approach Splitwise itself uses. All
-  amounts are JPY.
+- **Budget tab**: log an expense with a title, amount, currency (¥ JPY or
+  £ GBP — pick whichever the purchase was actually made in), who paid, and
+  who it's split between (equal shares; type a new name to add someone not
+  seen yet). Shows a running balance per person and minimal settle-up
+  suggestions ("Alex owes Sam ¥11,500") computed by greedily paying the
+  biggest debtor from the biggest creditor — same approach Splitwise itself
+  uses. Balances and settle-up are computed **per currency** — a JPY balance
+  and a GBP balance between the same two people are kept separate rather
+  than converted and combined, so nothing depends on an exchange rate. The
+  app remembers everyone who's ever been part of a Budget expense (a running
+  list stored on the trip itself), so both of you show up as pickable names
+  from the very first time either of you opens the tab.
 - **Presence**: while the app is open, your display name shows up as a small
   avatar in the header for everyone else with the app open too — no action
   needed. It disappears automatically within a minute or so of closing the

@@ -1,6 +1,6 @@
 import { Trash2 } from 'lucide-react'
 import { useBudget } from '../context/BudgetContext'
-import { formatYen } from '../lib/formatYen'
+import { formatCurrency } from '../lib/formatCurrency'
 import type { Expense } from '../types'
 
 interface ExpenseRowProps {
@@ -9,7 +9,7 @@ interface ExpenseRowProps {
 
 export default function ExpenseRow({ expense }: ExpenseRowProps) {
   const { deleteExpense } = useBudget()
-  const share = expense.amountJPY / Math.max(expense.splitBetween.length, 1)
+  const share = expense.amount / Math.max(expense.splitBetween.length, 1)
 
   return (
     <div className="flex items-start gap-3 rounded-xl border border-sumi/10 px-3 py-2.5 dark:border-white/10">
@@ -17,12 +17,13 @@ export default function ExpenseRow({ expense }: ExpenseRowProps) {
         <div className="flex items-baseline justify-between gap-2">
           <p className="text-sm text-sumi dark:text-white">{expense.title}</p>
           <p className="flex-none font-serif text-sm text-sumi dark:text-white">
-            {formatYen(expense.amountJPY)}
+            {formatCurrency(expense.amount, expense.currency)}
           </p>
         </div>
         <p className="mt-0.5 text-[11px] text-sumi/40 dark:text-white/30">
           Paid by {expense.paidBy} · split {expense.splitBetween.length}{' '}
-          {expense.splitBetween.length === 1 ? 'way' : 'ways'} ({formatYen(share)} each)
+          {expense.splitBetween.length === 1 ? 'way' : 'ways'} (
+          {formatCurrency(share, expense.currency)} each)
         </p>
       </div>
       <button
