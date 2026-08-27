@@ -23,6 +23,9 @@ automatically via GitHub Actions on every push — see
 - **Weather** — each day shows a forecast once it's close enough (within
   ~15 days), or last year's actual weather on that date as a rough reference
   further out — no API key needed
+- **Budget** — a shared, Splitwise-style expense tracker: log what's spent
+  and who it's split between, see running balances, and get minimal
+  "who owes who" settle-up suggestions
 - Swipe/tap between days with a sticky day picker
 - Installable to an Android or iOS home screen, works offline
 - Light and dark mode, tuned for both
@@ -49,6 +52,12 @@ across everyone viewing the app (see [Architecture](#architecture) below).
   rather than auto-matched against activities. Tap the heart on any item to
   favorite it — everyone's favorites show by name, and favorited items sort
   toward the top of their section, so personal stand-outs are easy to spot.
+- **Budget tab**: log an expense with a title, amount (¥), who paid, and who
+  it's split between (equal shares; type a new name to add someone not seen
+  yet). Shows a running balance per person and minimal settle-up suggestions
+  ("Alex owes Sam ¥11,500") computed by greedily paying the biggest debtor
+  from the biggest creditor — same approach Splitwise itself uses. All
+  amounts are JPY.
 - There's no login and no per-editor permissions — anyone with the app URL
   can edit or comment. That's a deliberate tradeoff for a small private trip
   group; see [Architecture](#architecture) if you want to lock it down further.
@@ -128,14 +137,17 @@ service cloud.firestore {
       match /wishlist/{itemId} {
         allow read, write: if true;
       }
+      match /expenses/{expenseId} {
+        allow read, write: if true;
+      }
     }
   }
 }
 ```
   Anyone with the app URL can read/write this one document, its comments,
-  and its wishlist — not your whole Firestore project. There's no login
-  system here; add Firebase Auth + rules keyed on `request.auth` if you want
-  per-editor permissions later.
+  wishlist, and expenses — not your whole Firestore project. There's no
+  login system here; add Firebase Auth + rules keyed on `request.auth` if
+  you want per-editor permissions later.
 - **Transport**: initialized with `experimentalAutoDetectLongPolling: true`
   so it falls back gracefully on networks that block Firestore's normal
   streaming connection (some corporate proxies, certain mobile

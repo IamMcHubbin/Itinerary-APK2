@@ -1,11 +1,11 @@
 import { format } from 'date-fns'
-import { Pencil, Check, MapPinned, ListTodo } from 'lucide-react'
+import { Pencil, Check, MapPinned, ListTodo, Wallet } from 'lucide-react'
 import type { Trip } from '../types'
 import { useEditMode } from '../context/EditModeContext'
 import { useTripStore } from '../context/TripContext'
 import { firebaseConfigured } from '../lib/firebase'
 
-export type AppView = 'itinerary' | 'wishlist'
+export type AppView = 'itinerary' | 'wishlist' | 'budget'
 
 interface TripHeaderProps {
   trip: Trip
@@ -13,6 +13,12 @@ interface TripHeaderProps {
   view: AppView
   onViewChange: (view: AppView) => void
 }
+
+const tabs: { id: AppView; label: string; icon: typeof MapPinned }[] = [
+  { id: 'itinerary', label: 'Itinerary', icon: MapPinned },
+  { id: 'wishlist', label: 'Wishlist', icon: ListTodo },
+  { id: 'budget', label: 'Budget', icon: Wallet },
+]
 
 export default function TripHeader({ trip, dayIndex, view, onViewChange }: TripHeaderProps) {
   const start = format(new Date(`${trip.startDate}T00:00:00`), 'MMM d')
@@ -64,27 +70,24 @@ export default function TripHeader({ trip, dayIndex, view, onViewChange }: TripH
           )}
         </div>
 
-        <div className="mt-4 flex gap-1 rounded-full bg-washi/10 p-1">
-          <button
-            type="button"
-            onClick={() => onViewChange('itinerary')}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-xs font-medium transition-colors ${
-              view === 'itinerary' ? 'bg-washi text-ai' : 'text-washi/70'
-            }`}
-          >
-            <MapPinned size={13} />
-            Itinerary
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewChange('wishlist')}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-xs font-medium transition-colors ${
-              view === 'wishlist' ? 'bg-washi text-ai' : 'text-washi/70'
-            }`}
-          >
-            <ListTodo size={13} />
-            Wishlist
-          </button>
+        <div className="no-scrollbar mt-4 flex gap-1 overflow-x-auto rounded-full bg-washi/10 p-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            const active = view === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onViewChange(tab.id)}
+                className={`flex flex-1 flex-none items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
+                  active ? 'bg-washi text-ai' : 'text-washi/70'
+                }`}
+              >
+                <Icon size={13} />
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
       </div>
     </header>
