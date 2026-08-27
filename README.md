@@ -11,6 +11,9 @@ automatically via GitHub Actions on every push — see
 ## Features
 
 - Day-by-day timeline with times, locations, categories, and travel tips
+- Tap any stop to expand it: full details, an embedded map, and links to open
+  it in Google Maps or Apple Maps
+- Per-day food recommendations, same tap-to-expand + map treatment
 - Swipe/tap between days with a sticky day picker
 - Installable to an Android or iOS home screen, works offline
 - Light and dark mode, tuned for both
@@ -18,16 +21,32 @@ automatically via GitHub Actions on every push — see
 
 ## Editing your trip
 
-All itinerary content lives in one file: `src/data/tripData.ts`. It's
-pre-filled with a 10-day sample Tokyo → Hakone → Kyoto → Osaka trip — replace
-it with your own dates, cities, and activities. The shape is defined in
+All itinerary content lives in one file: `src/data/tripData.ts`, currently
+filled in with the real Week 1 plan (Tokyo/Hakone/Nikko) — Week 2 is still
+being planned and isn't in the app yet. The shape is defined in
 `src/types.ts`:
 
 - `Trip` — title, subtitle, date range, and a list of `Day`s
-- `Day` — a date, city, short summary, and a list of `Activity`s
+- `Day` — a date, city, short summary, a list of `Activity`s, and optional
+  `notes` and `foodOptions`
 - `Activity` — time, title, category (`transport` / `food` / `sightseeing` /
   `lodging` / `shopping` / `experience`), and optional description, location,
-  and tip
+  rating, tip, `map` (lat/lng/label — pin an activity by adding this), and
+  `travelFromPrevious` (how to get here from the prior stop)
+- `FoodOption` — a name, description, rating, and optional `map`, listed
+  under each day's "Food options"
+
+Note: the dates in `tripData.ts` are placeholders until flights/hotels are
+booked — update `startDate`/`endDate` and each day's `date` once they're set.
+
+### Map embeds
+
+Activity/food cards with a `map` show an embedded Google Map using a keyless
+embed URL (`https://maps.google.com/maps?q=...&output=embed`, in
+`src/lib/maps.ts`) — no API key or billing needed, but it's an unofficial
+trick that could stop working. If it does, swap `googleMapsEmbedUrl` for the
+official [Maps Embed API](https://developers.google.com/maps/documentation/embed/get-started)
+with a free key.
 
 ## Running locally
 

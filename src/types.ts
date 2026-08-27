@@ -6,6 +6,23 @@ export type ActivityCategory =
   | 'shopping'
   | 'experience'
 
+export interface MapLocation {
+  lat: number
+  lng: number
+  /** Place name used for the Apple Maps query and embed title. */
+  label: string
+}
+
+export type TravelMode = 'walking' | 'transit' | 'driving'
+
+export interface TravelSegment {
+  mode: TravelMode
+  /** e.g. "10-12 min", "~20-25 min" */
+  duration?: string
+  distanceKm?: number
+  note?: string
+}
+
 export interface Activity {
   id: string
   time: string
@@ -14,7 +31,19 @@ export interface Activity {
   location?: string
   category: ActivityCategory
   tip?: string
-  durationMinutes?: number
+  /** Google-style rating out of 5, e.g. 4.8 */
+  rating?: number
+  map?: MapLocation
+  /** How to get here from the previous stop on the day's timeline. */
+  travelFromPrevious?: TravelSegment
+}
+
+export interface FoodOption {
+  id: string
+  name: string
+  description?: string
+  rating?: number
+  map?: MapLocation
 }
 
 export interface Day {
@@ -24,6 +53,8 @@ export interface Day {
   region?: string
   summary: string
   activities: Activity[]
+  foodOptions?: FoodOption[]
+  notes?: string[]
 }
 
 export interface Trip {
