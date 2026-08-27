@@ -7,6 +7,7 @@ import DaySelector from './components/DaySelector'
 import DayTimeline from './components/DayTimeline'
 import WishlistPage from './components/WishlistPage'
 import BudgetPage from './components/BudgetPage'
+import OverviewPage from './components/OverviewPage'
 import { TripProvider, useTripStore } from './context/TripContext'
 import { EditModeProvider, useEditMode } from './context/EditModeContext'
 import { CommentsProvider } from './context/CommentsContext'
@@ -30,6 +31,11 @@ function AppShell() {
     setDayIndex(index)
   }
 
+  const jumpToDay = (index: number) => {
+    goTo(index)
+    setView('itinerary')
+  }
+
   const day = trip.days[dayIndex]
   const showItineraryNav = view === 'itinerary' && Boolean(day)
 
@@ -46,6 +52,8 @@ function AppShell() {
           <WishlistPage />
         ) : view === 'budget' ? (
           <BudgetPage />
+        ) : view === 'overview' ? (
+          <OverviewPage onJumpToDay={jumpToDay} />
         ) : day ? (
           <AnimatePresence mode="wait">
             <DayTimeline key={day.id} day={day} dayIndex={dayIndex} />
