@@ -17,6 +17,9 @@ automatically via GitHub Actions on every push — see
 - **Live collaborative editing** — anyone with the app open can enter Edit
   mode to drag-reorder days, edit or add/delete activities, and leave notes
   on any stop; changes sync to everyone else's device in real time
+- **Wishlist** — a shared, categorized (Lodging/Sightseeing/Food) list of
+  things people want to do, separate from the confirmed itinerary; check an
+  item off once it's actually been planned
 - Swipe/tap between days with a sticky day picker
 - Installable to an Android or iOS home screen, works offline
 - Light and dark mode, tuned for both
@@ -35,6 +38,12 @@ across everyone viewing the app (see [Architecture](#architecture) below).
 - **Notes**: expand any activity and scroll to "Notes" to leave a comment —
   no login, just a display name (stored on your device) so others can see
   who left it. Comments appear for everyone live, independent of edit mode.
+- **Wishlist tab**: switch to it from the header. Suggest a place under
+  Lodging/Sightseeing/Food (name required the first time, remembered after
+  that), then tick it off once it's actually planned — optionally picking
+  which day it landed on. This is deliberately separate from the itinerary:
+  it's a running "things we might want to do" list, checked off manually
+  rather than auto-matched against activities.
 - There's no login and no per-editor permissions — anyone with the app URL
   can edit or comment. That's a deliberate tradeoff for a small private trip
   group; see [Architecture](#architecture) if you want to lock it down further.
@@ -53,6 +62,9 @@ Firestore too:
   `travelFromPrevious` (how to get here from the prior stop)
 - `FoodOption` — a name, description, rating, and optional `map`, listed
   under each day's "Food options"
+- `WishlistItem` (in the separate Wishlist tab, not `tripData.ts`) — category
+  (`lodging`/`sightseeing`/`food`), title, notes, who suggested it, whether
+  it's planned, and optionally which day it landed on
 
 ### Map embeds
 
@@ -74,9 +86,10 @@ name resolves to the actual listing. `lat`/`lng` are still stored on `map`
 The app talks to a single Firestore document (`trips/japan-2026`) that holds
 the whole trip, kept in sync via a realtime listener (`onSnapshot`) — every
 edit anywhere writes the whole `days` array back, and everyone's `onSnapshot`
-listener picks up the change within a second or two. Notes/comments live in
-a `comments` subcollection instead, so posting one doesn't require
-read-modify-writing the whole trip document.
+listener picks up the change within a second or two. Notes/comments and
+wishlist items each live in their own subcollection (`comments`, `wishlist`)
+instead, so posting one doesn't require read-modify-writing the whole trip
+document.
 
 - **Config**: `src/lib/firebase.ts` reads `VITE_FIREBASE_*` env vars. These
   values aren't secret (Firebase's own guidance: client config is safe to
@@ -93,14 +106,17 @@ service cloud.firestore {
       match /comments/{commentId} {
         allow read, write: if true;
       }
+      match /wishlist/{itemId} {
+        allow read, write: if true;
+      }
     }
   }
 }
 ```
-  Anyone with the app URL can read/write this one document and its comments
-  — not your whole Firestore project. There's no login system here; add
-  Firebase Auth + rules keyed on `request.auth` if you want per-editor
-  permissions later.
+  Anyone with the app URL can read/write this one document, its comments,
+  and its wishlist — not your whole Firestore project. There's no login
+  system here; add Firebase Auth + rules keyed on `request.auth` if you want
+  per-editor permissions later.
 - **Transport**: initialized with `experimentalAutoDetectLongPolling: true`
   so it falls back gracefully on networks that block Firestore's normal
   streaming connection (some corporate proxies, certain mobile
