@@ -13,12 +13,19 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { db, TRIP_ID, firebaseConfigured } from '../lib/firebase'
-import type { WishlistCategory, WishlistItem } from '../types'
+import type { FoodKind, WishlistCategory, WishlistItem } from '../types'
 
 interface WishlistContextValue {
   items: WishlistItem[]
   ready: boolean
-  addItem: (category: WishlistCategory, title: string, notes: string, author: string) => void
+  addItem: (
+    category: WishlistCategory,
+    title: string,
+    notes: string,
+    author: string,
+    foodKind?: FoodKind,
+    foodTypes?: string,
+  ) => void
   setPlanned: (itemId: string, planned: boolean, linkedDayId?: string) => void
   deleteItem: (itemId: string) => void
   toggleFavorite: (itemId: string, name: string, favorited: boolean) => void
@@ -48,8 +55,17 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addItem = useCallback(
-    (category: WishlistCategory, title: string, notes: string, author: string) => {
+    (
+      category: WishlistCategory,
+      title: string,
+      notes: string,
+      author: string,
+      foodKind?: FoodKind,
+      foodTypes?: string,
+    ) => {
       if (!db) return
+      // Firestore rejects `undefined` field values, so foodKind/foodTypes
+      // only get included when they actually apply (category === 'food').
       addDoc(collection(db, 'trips', TRIP_ID, 'wishlist'), {
         category,
         title,
@@ -57,6 +73,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         addedBy: author,
         createdAt: Date.now(),
         planned: false,
+        ...(foodKind ? { foodKind } : {}),
+        ...(foodTypes ? { foodTypes } : {}),
       }).catch((error) => console.error('Failed to add wishlist item', error))
     },
     [],

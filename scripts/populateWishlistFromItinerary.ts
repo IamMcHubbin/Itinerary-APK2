@@ -75,6 +75,8 @@ async function main() {
         createdAt: Date.now(),
         planned: true,
         linkedDayId: day.id,
+        // Every food *activity* names a specific place, not a cuisine to try.
+        ...(category === 'food' ? { foodKind: 'restaurant' as const } : {}),
       })
     }
 
@@ -87,6 +89,7 @@ async function main() {
         addedBy: AUTO_AUTHOR,
         createdAt: Date.now(),
         planned: false,
+        foodKind: 'restaurant',
       })
     }
   }

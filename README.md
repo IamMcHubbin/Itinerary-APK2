@@ -57,6 +57,11 @@ across everyone viewing the app (see [Architecture](#architecture) below).
   rather than auto-matched against activities. Tap the heart on any item to
   favorite it — everyone's favorites show by name, and favorited items sort
   toward the top of their section, so personal stand-outs are easy to spot.
+  Food items aren't split into separate lists, but each one is tagged as
+  either a specific **Restaurant** (optionally noting what it serves, e.g.
+  "Ramen, Tsukemen") or a general **Food type** to try (e.g. "Ramen") — shown
+  as a small label under the name, so "a place to eat" and "a cuisine to
+  find somewhere for" stay visually distinct within the same Food section.
 - **Budget tab**: log an expense with a title, amount, currency (¥ JPY or
   £ GBP — pick whichever the purchase was actually made in), who paid (tap a
   name), and who it's split between — tap **Everyone** for the common case,
