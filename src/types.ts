@@ -67,6 +67,9 @@ export interface Comment {
 
 export type WishlistCategory = 'lodging' | 'sightseeing' | 'food'
 
+/** Food items only: a specific place, or a general food type/cuisine to try. */
+export type FoodKind = 'restaurant' | 'cuisine'
+
 export interface WishlistItem {
   id: string
   category: WishlistCategory
@@ -79,6 +82,10 @@ export interface WishlistItem {
   linkedDayId?: string
   /** Display names of everyone who's favorited this item. */
   favoritedBy?: string[]
+  /** Food items only: whether `title` names a restaurant or a food type/cuisine. */
+  foodKind?: FoodKind
+  /** Food items only, when foodKind is 'restaurant': what it serves, e.g. "Ramen, Tsukemen". */
+  foodTypes?: string
 }
 
 export type Currency = 'JPY' | 'GBP'

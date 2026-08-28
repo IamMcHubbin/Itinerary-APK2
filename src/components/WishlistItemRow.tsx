@@ -66,6 +66,15 @@ export default function WishlistItemRow({ item }: WishlistItemRowProps) {
         >
           {item.title}
         </p>
+        {item.foodKind && (
+          <p className="mt-0.5 text-[11px] tracking-wide text-sumi/40 uppercase dark:text-white/30">
+            {item.foodKind === 'restaurant'
+              ? item.foodTypes
+                ? `Restaurant · ${item.foodTypes}`
+                : 'Restaurant'
+              : 'Food type to try'}
+          </p>
+        )}
         {item.notes && (
           <p className="mt-0.5 text-xs text-sumi/50 dark:text-white/40">{item.notes}</p>
         )}

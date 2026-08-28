@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { categoryStyles } from '../lib/categoryStyles'
 import { useWishlist } from '../context/WishlistContext'
 import { useDisplayName } from '../hooks/useDisplayName'
-import type { WishlistCategory, WishlistItem } from '../types'
+import type { FoodKind, WishlistCategory, WishlistItem } from '../types'
 import WishlistItemRow from './WishlistItemRow'
 
 interface WishlistSectionProps {
@@ -14,8 +14,13 @@ interface WishlistSectionProps {
 const placeholders: Record<WishlistCategory, string> = {
   lodging: 'e.g. A night in a ryokan',
   sightseeing: 'e.g. teamLab exhibit',
-  food: 'e.g. Conveyor-belt sushi',
+  food: 'e.g. Ichiran, or just "Ramen"',
 }
+
+const foodKinds: { value: FoodKind; label: string }[] = [
+  { value: 'restaurant', label: 'Restaurant' },
+  { value: 'cuisine', label: 'Food type' },
+]
 
 const inputClassName =
   'w-full rounded-lg border border-sumi/15 bg-transparent px-3 py-1.5 text-sm text-sumi placeholder:text-sumi/40 focus:border-ai focus:outline-none dark:border-white/15 dark:text-white dark:placeholder:text-white/30 dark:focus:border-ai-light'
@@ -29,6 +34,8 @@ export default function WishlistSection({ category, items }: WishlistSectionProp
   const [titleDraft, setTitleDraft] = useState('')
   const [notesDraft, setNotesDraft] = useState('')
   const [nameDraft, setNameDraft] = useState('')
+  const [foodKindDraft, setFoodKindDraft] = useState<FoodKind>('restaurant')
+  const [foodTypesDraft, setFoodTypesDraft] = useState('')
 
   const authorName = name ?? nameDraft.trim()
   const openCount = items.filter((item) => !item.planned).length
@@ -43,10 +50,23 @@ export default function WishlistSection({ category, items }: WishlistSectionProp
     const title = titleDraft.trim()
     if (!title || !authorName) return
     if (!name) saveName(authorName)
-    addItem(category, title, notesDraft.trim(), authorName)
+    if (category === 'food') {
+      addItem(
+        category,
+        title,
+        notesDraft.trim(),
+        authorName,
+        foodKindDraft,
+        foodKindDraft === 'restaurant' ? foodTypesDraft.trim() : undefined,
+      )
+    } else {
+      addItem(category, title, notesDraft.trim(), authorName)
+    }
     setTitleDraft('')
     setNotesDraft('')
     setNameDraft('')
+    setFoodKindDraft('restaurant')
+    setFoodTypesDraft('')
     setShowForm(false)
   }
 
@@ -81,6 +101,34 @@ export default function WishlistSection({ category, items }: WishlistSectionProp
             className={inputClassName}
             autoFocus
           />
+          {category === 'food' && (
+            <>
+              <div className="flex rounded-lg border border-sumi/15 p-0.5 dark:border-white/15">
+                {foodKinds.map((k) => (
+                  <button
+                    key={k.value}
+                    type="button"
+                    onClick={() => setFoodKindDraft(k.value)}
+                    className={`flex-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                      foodKindDraft === k.value
+                        ? 'bg-ai text-washi dark:bg-ai-light'
+                        : 'text-sumi/50 dark:text-white/40'
+                    }`}
+                  >
+                    {k.label}
+                  </button>
+                ))}
+              </div>
+              {foodKindDraft === 'restaurant' && (
+                <input
+                  value={foodTypesDraft}
+                  onChange={(e) => setFoodTypesDraft(e.target.value)}
+                  placeholder="What kind of food? e.g. Ramen, Tsukemen (optional)"
+                  className={inputClassName}
+                />
+              )}
+            </>
+          )}
           <input
             value={notesDraft}
             onChange={(e) => setNotesDraft(e.target.value)}
