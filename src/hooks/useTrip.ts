@@ -4,6 +4,7 @@ import { db, TRIP_ID, firebaseConfigured } from '../lib/firebase'
 import { trip as seedTrip } from '../data/tripData'
 import { recomputeDates } from '../lib/recomputeDates'
 import { makeId } from '../lib/id'
+import { dedupeNamesCaseInsensitive, resolveName } from '../lib/names'
 import type { Activity, Day, Trip } from '../types'
 
 export interface UseTripResult {
@@ -159,13 +160,21 @@ export function useTrip(): UseTripResult {
   )
 
   const addBudgetParticipants = useCallback((names: string[]) => {
-    const trimmed = Array.from(new Set(names.map((n) => n.trim()).filter(Boolean)))
-    if (!db || trimmed.length === 0) return
+    if (!db) return
+    const existing = tripRef.current.budgetParticipants ?? []
+    // Resolve each name to an existing participant's casing first ("jamie" ->
+    // "Jamie" if that's already known), then only the genuinely new ones —
+    // by any casing — get added, so the same person never appears twice.
+    const resolved = dedupeNamesCaseInsensitive(names.map((n) => resolveName(n, existing)))
+    const newOnes = resolved.filter(
+      (n) => !existing.some((e) => e.toLowerCase() === n.toLowerCase()),
+    )
+    if (newOnes.length === 0) return
     setTrip((current) => ({
       ...current,
-      budgetParticipants: Array.from(new Set([...(current.budgetParticipants ?? []), ...trimmed])),
+      budgetParticipants: [...(current.budgetParticipants ?? []), ...newOnes],
     }))
-    updateDoc(doc(db, 'trips', TRIP_ID), { budgetParticipants: arrayUnion(...trimmed) }).catch(
+    updateDoc(doc(db, 'trips', TRIP_ID), { budgetParticipants: arrayUnion(...newOnes) }).catch(
       (error) => console.error('Failed to save budget participants', error),
     )
   }, [])

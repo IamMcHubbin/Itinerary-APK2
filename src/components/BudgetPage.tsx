@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Scale, HandCoins } from 'lucide-react'
+import { Plus, Scale, HandCoins, ChevronDown } from 'lucide-react'
 import { useBudget } from '../context/BudgetContext'
 import { useTripStore } from '../context/TripContext'
 import { useDisplayName } from '../hooks/useDisplayName'
 import { formatCurrency, formatTotals, totalsByCurrency } from '../lib/formatCurrency'
+import { dedupeNamesCaseInsensitive, resolveName } from '../lib/names'
 import { computeBalances, computeSettlements } from '../lib/settleUp'
 import type { Currency } from '../types'
 import ExpenseRow from './ExpenseRow'
@@ -28,13 +29,17 @@ export default function BudgetPage() {
   }, [name, addBudgetParticipants])
 
   const knownNames = useMemo(() => {
-    const names = new Set<string>(trip.budgetParticipants ?? [])
-    if (name) names.add(name)
-    for (const expense of expenses) {
-      names.add(expense.paidBy)
-      for (const person of expense.splitBetween) names.add(person)
-    }
-    return Array.from(names).sort()
+    const persisted = trip.budgetParticipants ?? []
+    // Persisted casing wins for anyone already known — "jamie" resolves to
+    // the existing "Jamie" rather than showing up as a separate person.
+    const ownName = name ? resolveName(name, persisted) : null
+    const raw = [
+      ...persisted,
+      ...(ownName ? [ownName] : []),
+      ...expenses.map((e) => e.paidBy),
+      ...expenses.flatMap((e) => e.splitBetween),
+    ]
+    return dedupeNamesCaseInsensitive(raw).sort((a, b) => a.localeCompare(b))
   }, [expenses, name, trip.budgetParticipants])
 
   const balances = useMemo(() => computeBalances(expenses), [expenses])
@@ -51,7 +56,7 @@ export default function BudgetPage() {
   const [splitWith, setSplitWith] = useState<Set<string>>(new Set(knownNames))
 
   const allPeople = useMemo(
-    () => Array.from(new Set([...knownNames, ...extraPeople])).sort(),
+    () => dedupeNamesCaseInsensitive([...knownNames, ...extraPeople]).sort((a, b) => a.localeCompare(b)),
     [knownNames, extraPeople],
   )
 
@@ -64,11 +69,19 @@ export default function BudgetPage() {
     })
   }
 
+  const everyoneSelected = allPeople.length > 0 && splitWith.size === allPeople.length
+  const selectEveryone = () => setSplitWith(new Set(allPeople))
+
   const addPerson = () => {
-    const trimmed = newPersonDraft.trim()
-    if (!trimmed) return
-    setExtraPeople((current) => (current.includes(trimmed) ? current : [...current, trimmed]))
-    setSplitWith((current) => new Set(current).add(trimmed))
+    // Resolve to an existing person's casing if one matches — "jamie" reuses
+    // "Jamie" instead of creating a second, differently-cased entry.
+    const resolved = resolveName(newPersonDraft, allPeople)
+    if (!resolved) return
+    const alreadyKnown = allPeople.some((p) => p.toLowerCase() === resolved.toLowerCase())
+    if (!alreadyKnown) {
+      setExtraPeople((current) => (current.includes(resolved) ? current : [...current, resolved]))
+    }
+    setSplitWith((current) => new Set(current).add(resolved))
     setNewPersonDraft('')
   }
 
@@ -194,22 +207,50 @@ export default function BudgetPage() {
               ))}
             </div>
           </div>
-          <input
-            value={paidByDraft}
-            onChange={(e) => setPaidByDraft(e.target.value)}
-            placeholder="Paid by"
-            list="budget-known-names"
-            className={inputClassName}
-          />
-          <datalist id="budget-known-names">
-            {allPeople.map((p) => (
-              <option key={p} value={p} />
-            ))}
-          </datalist>
+          <div>
+            <p className="mb-1.5 text-xs text-sumi/50 dark:text-white/40">Paid by</p>
+            {allPeople.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {allPeople.map((person) => (
+                  <button
+                    key={person}
+                    type="button"
+                    onClick={() => setPaidByDraft(person)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                      paidByDraft === person
+                        ? 'bg-ai text-washi dark:bg-ai-light'
+                        : 'bg-sumi/5 text-sumi/50 dark:bg-white/5 dark:text-white/40'
+                    }`}
+                  >
+                    {person}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <input
+                value={paidByDraft}
+                onChange={(e) => setPaidByDraft(e.target.value)}
+                placeholder="Your name"
+                className={inputClassName}
+              />
+            )}
+          </div>
 
           <div>
             <p className="mb-1.5 text-xs text-sumi/50 dark:text-white/40">Split between</p>
             <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={selectEveryone}
+                disabled={allPeople.length === 0}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors disabled:opacity-30 ${
+                  everyoneSelected
+                    ? 'bg-gold text-ink'
+                    : 'bg-sumi/5 text-sumi/50 dark:bg-white/5 dark:text-white/40'
+                }`}
+              >
+                Everyone
+              </button>
               {allPeople.map((person) => (
                 <button
                   key={person}
@@ -226,18 +267,30 @@ export default function BudgetPage() {
               ))}
             </div>
             <div className="mt-1.5 flex items-center gap-1.5">
-              <input
-                value={newPersonDraft}
-                onChange={(e) => setNewPersonDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addPerson()
-                  }
-                }}
-                placeholder="Add someone new"
-                className="min-w-0 flex-1 rounded-full border border-sumi/15 bg-transparent px-2.5 py-1 text-xs text-sumi placeholder:text-sumi/40 focus:border-ai focus:outline-none dark:border-white/15 dark:text-white dark:placeholder:text-white/30"
-              />
+              <div className="relative min-w-0 flex-1">
+                <input
+                  value={newPersonDraft}
+                  onChange={(e) => setNewPersonDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addPerson()
+                    }
+                  }}
+                  placeholder="Add someone new"
+                  list="budget-known-names"
+                  className="w-full rounded-full border border-sumi/15 bg-transparent py-1 pr-6 pl-2.5 text-xs text-sumi placeholder:text-sumi/40 focus:border-ai focus:outline-none dark:border-white/15 dark:text-white dark:placeholder:text-white/30"
+                />
+                <ChevronDown
+                  size={12}
+                  className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sumi/30 dark:text-white/25"
+                />
+                <datalist id="budget-known-names">
+                  {allPeople.map((p) => (
+                    <option key={p} value={p} />
+                  ))}
+                </datalist>
+              </div>
               <button
                 type="button"
                 onClick={addPerson}
