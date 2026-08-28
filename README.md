@@ -58,17 +58,21 @@ across everyone viewing the app (see [Architecture](#architecture) below).
   favorite it — everyone's favorites show by name, and favorited items sort
   toward the top of their section, so personal stand-outs are easy to spot.
 - **Budget tab**: log an expense with a title, amount, currency (¥ JPY or
-  £ GBP — pick whichever the purchase was actually made in), who paid, and
-  who it's split between (equal shares; type a new name to add someone not
-  seen yet). Shows a running balance per person and minimal settle-up
-  suggestions ("Alex owes Sam ¥11,500") computed by greedily paying the
-  biggest debtor from the biggest creditor — same approach Splitwise itself
-  uses. Balances and settle-up are computed **per currency** — a JPY balance
-  and a GBP balance between the same two people are kept separate rather
-  than converted and combined, so nothing depends on an exchange rate. The
-  app remembers everyone who's ever been part of a Budget expense (a running
-  list stored on the trip itself), so both of you show up as pickable names
-  from the very first time either of you opens the tab.
+  £ GBP — pick whichever the purchase was actually made in), who paid (tap a
+  name), and who it's split between — tap **Everyone** for the common case,
+  or pick just one person for something that wasn't shared. Type a new name
+  (with autocomplete from everyone seen so far) to add someone not seen yet;
+  names are matched case-insensitively, so "jamie" and "Jamie" are always
+  treated as the same person rather than becoming two separate people. Shows
+  a running balance per person and minimal settle-up suggestions ("Alex owes
+  Sam ¥11,500") computed by greedily paying the biggest debtor from the
+  biggest creditor — same approach Splitwise itself uses. Balances and
+  settle-up are computed **per currency** — a JPY balance and a GBP balance
+  between the same two people are kept separate rather than converted and
+  combined, so nothing depends on an exchange rate. The app remembers
+  everyone who's ever been part of a Budget expense (a running list stored
+  on the trip itself), so both of you show up as pickable names from the
+  very first time either of you opens the tab.
 - **Presence**: while the app is open, your display name shows up as a small
   avatar in the header for everyone else with the app open too — no action
   needed. It disappears automatically within a minute or so of closing the

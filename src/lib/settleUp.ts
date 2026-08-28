@@ -15,34 +15,40 @@ export interface Settlement {
   amount: number
 }
 
+// Grouped case-insensitively so "jamie" and "Jamie" are always the same
+// person, even if mismatched casing ever made it into stored expenses.
 function balanceKey(name: string, currency: Currency): string {
-  return `${currency}|${name}`
+  return `${currency}|${name.trim().toLowerCase()}`
 }
 
 export function computeBalances(expenses: Expense[]): Balance[] {
   const net = new Map<string, number>()
-  const touch = (key: string) => {
-    if (!net.has(key)) net.set(key, 0)
+  const displayName = new Map<string, string>()
+  const touch = (key: string, original: string) => {
+    if (!net.has(key)) {
+      net.set(key, 0)
+      displayName.set(key, original)
+    }
   }
 
   for (const expense of expenses) {
     if (expense.splitBetween.length === 0) continue
     const payerKey = balanceKey(expense.paidBy, expense.currency)
-    touch(payerKey)
+    touch(payerKey, expense.paidBy)
     net.set(payerKey, (net.get(payerKey) ?? 0) + expense.amount)
 
     const share = expense.amount / expense.splitBetween.length
     for (const person of expense.splitBetween) {
       const key = balanceKey(person, expense.currency)
-      touch(key)
+      touch(key, person)
       net.set(key, (net.get(key) ?? 0) - share)
     }
   }
 
   return Array.from(net.entries())
     .map(([key, value]) => {
-      const [currency, name] = key.split('|') as [Currency, string]
-      return { name, currency, net: roundForCurrency(value, currency) }
+      const [currency] = key.split('|') as [Currency, string]
+      return { name: displayName.get(key)!, currency, net: roundForCurrency(value, currency) }
     })
     .sort((a, b) => b.net - a.net)
 }
