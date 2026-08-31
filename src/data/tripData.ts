@@ -16,7 +16,7 @@ export const trip: Trip = {
     {
       id: 'day-0-travel',
       date: '2026-09-13',
-      city: 'Travel',
+      city: 'Tokyo',
       region: 'Heathrow → Haneda',
       summary: 'Outbound flight — JL42, overnight to Tokyo',
       activities: [
@@ -339,40 +339,8 @@ export const trip: Trip = {
       ],
     },
     {
-      id: 'day-5',
-      date: '2026-09-18',
-      city: 'Mitake',
-      region: 'Day trip',
-      summary: 'Gorge climbing and bouldering',
-      notes: ['Nature/activity day — bring your own food, limited options at the gorge.'],
-      activities: [
-        {
-          id: 'd5-1',
-          time: '08:00',
-          title: 'Train: JR Chuo to Ome, transfer to Ome Line',
-          category: 'transport',
-          description: '~1.5 hrs from Shinjuku.',
-        },
-        {
-          id: 'd5-2',
-          time: '10:00',
-          title: 'Mitake Gorge climbing/bouldering',
-          category: 'experience',
-          description:
-            'Riverside Walking Path. Proper footwear — water is fast and deep in places.',
-          map: { lat: 35.8004966, lng: 139.1832395, label: 'Mitake Gorge' },
-        },
-        {
-          id: 'd5-3',
-          time: '18:00',
-          title: 'Return to Shinjuku',
-          category: 'transport',
-        },
-      ],
-    },
-    {
       id: 'day-6',
-      date: '2026-09-19',
+      date: '2026-09-18',
       city: 'Hakone',
       region: 'Day trip',
       summary: 'Volcanic valley, lake cruise, Mt Fuji views',
@@ -437,6 +405,38 @@ export const trip: Trip = {
           description: 'Buddhist monk breakfast, vegetarian, book ahead. Opens 8-10am only.',
           rating: 4.9,
           map: { lat: 35.2443023, lng: 139.0581128, label: 'Saien Hakone' },
+        },
+      ],
+    },
+    {
+      id: 'day-5',
+      date: '2026-09-19',
+      city: 'Mitake',
+      region: 'Day trip',
+      summary: 'Gorge climbing and bouldering',
+      notes: ['Nature/activity day — bring your own food, limited options at the gorge.'],
+      activities: [
+        {
+          id: 'd5-1',
+          time: '08:00',
+          title: 'Train: JR Chuo to Ome, transfer to Ome Line',
+          category: 'transport',
+          description: '~1.5 hrs from Shinjuku.',
+        },
+        {
+          id: 'd5-2',
+          time: '10:00',
+          title: 'Mitake Gorge climbing/bouldering',
+          category: 'experience',
+          description:
+            'Riverside Walking Path. Proper footwear — water is fast and deep in places.',
+          map: { lat: 35.8004966, lng: 139.1832395, label: 'Mitake Gorge' },
+        },
+        {
+          id: 'd5-3',
+          time: '18:00',
+          title: 'Return to Shinjuku',
+          category: 'transport',
         },
       ],
     },
@@ -577,7 +577,7 @@ export const trip: Trip = {
     {
       id: 'day-14-return',
       date: '2026-09-27',
-      city: 'Travel',
+      city: 'London',
       region: 'Haneda → Heathrow',
       summary: 'Return flight — JL7121, direct to London',
       activities: [
