@@ -19,6 +19,8 @@ export interface UseTripResult {
   addActivity: (dayId: string) => string
   updateActivity: (dayId: string, activityId: string, patch: Partial<Activity>) => void
   deleteActivity: (dayId: string, activityId: string) => void
+  /** Manual override of the auto time-sort — drag lets two same-time activities sit in a chosen order. */
+  reorderActivities: (dayId: string, fromIndex: number, toIndex: number) => void
   /** Adds names to the trip's running list of Budget participants (never removes any). */
   addBudgetParticipants: (names: string[]) => void
 }
@@ -40,6 +42,11 @@ function emptyActivity(): Activity {
     title: 'New activity',
     category: 'experience',
   }
+}
+
+/** Activities default to falling in time order — stable, so ties keep their existing order. */
+function sortByTime(activities: Activity[]): Activity[] {
+  return [...activities].sort((a, b) => a.time.localeCompare(b.time))
 }
 
 export function useTrip(): UseTripResult {
@@ -124,7 +131,7 @@ export function useTrip(): UseTripResult {
     (dayId: string) => {
       const activity = emptyActivity()
       const days = tripRef.current.days.map((day) =>
-        day.id === dayId ? { ...day, activities: [...day.activities, activity] } : day,
+        day.id === dayId ? { ...day, activities: sortByTime([...day.activities, activity]) } : day,
       )
       applyDays(days)
       return activity.id
@@ -138,8 +145,10 @@ export function useTrip(): UseTripResult {
         if (day.id !== dayId) return day
         return {
           ...day,
-          activities: day.activities.map((activity) =>
-            activity.id === activityId ? { ...activity, ...patch } : activity,
+          activities: sortByTime(
+            day.activities.map((activity) =>
+              activity.id === activityId ? { ...activity, ...patch } : activity,
+            ),
           ),
         }
       })
@@ -153,6 +162,20 @@ export function useTrip(): UseTripResult {
       const days = tripRef.current.days.map((day) => {
         if (day.id !== dayId) return day
         return { ...day, activities: day.activities.filter((a) => a.id !== activityId) }
+      })
+      applyDays(days)
+    },
+    [applyDays],
+  )
+
+  const reorderActivities = useCallback(
+    (dayId: string, fromIndex: number, toIndex: number) => {
+      const days = tripRef.current.days.map((day) => {
+        if (day.id !== dayId) return day
+        const activities = [...day.activities]
+        const [moved] = activities.splice(fromIndex, 1)
+        activities.splice(toIndex, 0, moved)
+        return { ...day, activities }
       })
       applyDays(days)
     },
@@ -190,6 +213,7 @@ export function useTrip(): UseTripResult {
     addActivity,
     updateActivity,
     deleteActivity,
+    reorderActivities,
     addBudgetParticipants,
   }
 }

@@ -1,6 +1,15 @@
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { Plus, StickyNote, Trash2 } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import type { DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { Day } from '../types'
 import ActivityCard from './ActivityCard'
 import EditableText from './EditableText'
@@ -16,7 +25,17 @@ interface DayTimelineProps {
 
 export default function DayTimeline({ day, dayIndex }: DayTimelineProps) {
   const { editMode } = useEditMode()
-  const { updateDayField, addActivity, addDay, deleteDay } = useTripStore()
+  const { updateDayField, addActivity, addDay, deleteDay, reorderActivities } = useTripStore()
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const handleActivityDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const fromIndex = day.activities.findIndex((a) => a.id === active.id)
+    const toIndex = day.activities.findIndex((a) => a.id === over.id)
+    if (fromIndex === -1 || toIndex === -1) return
+    reorderActivities(day.id, fromIndex, toIndex)
+  }
 
   return (
     <motion.div
@@ -69,16 +88,23 @@ export default function DayTimeline({ day, dayIndex }: DayTimelineProps) {
         )}
       </div>
 
-      <div>
-        {day.activities.map((activity, index) => (
-          <ActivityCard
-            key={activity.id}
-            dayId={day.id}
-            activity={activity}
-            isLast={index === day.activities.length - 1}
-          />
-        ))}
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleActivityDragEnd}>
+        <SortableContext
+          items={day.activities.map((a) => a.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div>
+            {day.activities.map((activity, index) => (
+              <ActivityCard
+                key={activity.id}
+                dayId={day.id}
+                activity={activity}
+                isLast={index === day.activities.length - 1}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {editMode && (
         <button
