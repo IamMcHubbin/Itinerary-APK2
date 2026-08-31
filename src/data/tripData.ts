@@ -1,8 +1,11 @@
 import type { Trip } from '../types'
 
-// Trip dates: Sun 13 Sep – Sun 27 Sep 2026. Days 9-15 (Week 2) aren't in
-// here yet — they're still being planned, so they're intentionally left
-// out rather than added as empty placeholders.
+// Trip dates: Sun 13 Sep – Sun 27 Sep 2026. Day 1 is the outbound flight
+// (JL42), landing overnight on Mon 14 Sep — everything from there shifts a
+// day later than the flight-out date. Days 9-15 (Week 2, including the
+// Sun 27 Sep return flight, JL7121) aren't in here yet — they're still
+// being planned, so they're intentionally left out rather than added as
+// empty placeholders.
 export const trip: Trip = {
   title: 'Japan',
   subtitle: 'Tokyo · Hakone · Nikko',
@@ -11,8 +14,26 @@ export const trip: Trip = {
   coverEmoji: '⛩️',
   days: [
     {
-      id: 'day-1',
+      id: 'day-0-travel',
       date: '2026-09-13',
+      city: 'Travel',
+      region: 'Heathrow → Haneda',
+      summary: 'Outbound flight — JL42, overnight to Tokyo',
+      activities: [
+        {
+          id: 'd0-1',
+          time: '09:10',
+          title: 'Depart London Heathrow — JL42',
+          category: 'transport',
+          location: 'Heathrow Terminal 3',
+          description:
+            'Japan Airlines JL42, Terminal 3. Lands Tokyo Haneda the next morning at 06:45 JST (Mon 14 Sep) — Japan is 8 hours ahead of the UK in September (BST).',
+        },
+      ],
+    },
+    {
+      id: 'day-1',
+      date: '2026-09-14',
       city: 'Tokyo',
       region: 'Haneda → Shinjuku',
       summary: 'Arrival & adjuster day — deliberately light',
@@ -23,11 +44,11 @@ export const trip: Trip = {
       activities: [
         {
           id: 'd1-1',
-          time: '06:30',
+          time: '06:45',
           title: 'Land at Haneda',
           category: 'transport',
           description:
-            'Immigration, baggage, and the airport transfer to Shinjuku — allow 60-90 min.',
+            'Flight JL42 lands. Immigration, baggage, and the airport transfer to Shinjuku — allow 60-90 min.',
         },
         {
           id: 'd1-2',
@@ -88,7 +109,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-2',
-      date: '2026-09-14',
+      date: '2026-09-15',
       city: 'Tokyo',
       region: 'Asakusa & Akihabara',
       summary: 'Old Tokyo meets electric town, sunset at Skytree',
@@ -176,7 +197,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-3',
-      date: '2026-09-15',
+      date: '2026-09-16',
       city: 'Tokyo',
       region: 'Tsukiji, Toyosu & Odaiba',
       summary: 'Early market run, digital art, waterfront',
@@ -239,7 +260,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-4',
-      date: '2026-09-16',
+      date: '2026-09-17',
       city: 'Tokyo',
       region: 'Shibuya & Shinjuku',
       summary: 'Crossings, digital art at Azabudai Hills, Golden Gai',
@@ -319,7 +340,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-5',
-      date: '2026-09-17',
+      date: '2026-09-18',
       city: 'Mitake',
       region: 'Day trip',
       summary: 'Gorge climbing and bouldering',
@@ -351,7 +372,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-6',
-      date: '2026-09-18',
+      date: '2026-09-19',
       city: 'Hakone',
       region: 'Day trip',
       summary: 'Volcanic valley, lake cruise, Mt Fuji views',
@@ -421,7 +442,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-7',
-      date: '2026-09-19',
+      date: '2026-09-20',
       city: 'Nikko',
       region: 'Day trip',
       summary: 'Shrines, waterfalls, mountain roads',
@@ -488,7 +509,7 @@ export const trip: Trip = {
     },
     {
       id: 'day-8',
-      date: '2026-09-20',
+      date: '2026-09-21',
       city: 'Tokyo',
       region: 'Ginza',
       summary: 'Last shopping, pack up',
