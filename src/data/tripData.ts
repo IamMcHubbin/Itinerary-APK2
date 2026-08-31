@@ -2,10 +2,10 @@ import type { Trip } from '../types'
 
 // Trip dates: Sun 13 Sep – Sun 27 Sep 2026. Day 1 is the outbound flight
 // (JL42), landing overnight on Mon 14 Sep — everything from there shifts a
-// day later than the flight-out date. Days 9-15 (Week 2, including the
-// Sun 27 Sep return flight, JL7121) aren't in here yet — they're still
-// being planned, so they're intentionally left out rather than added as
-// empty placeholders.
+// day later than the flight-out date. Days 9-13 (Sep 22-26) are genuine
+// placeholders — Week 2 isn't planned yet — kept in (rather than left out)
+// so the return flight (day-14-return, JL7121) lands on its correct,
+// already-booked date of Sun 27 Sep instead of the date math shifting it.
 export const trip: Trip = {
   title: 'Japan',
   subtitle: 'Tokyo · Hakone · Nikko',
@@ -566,6 +566,29 @@ export const trip: Trip = {
             'Short hop to Nihonbashi — genuine local favorite, not a tourist queue, rich broth, ~¥1200.',
           rating: 4.8,
           map: { lat: 35.6792485, lng: 139.7799594, label: 'Nobunaga Ramen' },
+        },
+      ],
+    },
+    { id: 'day-9', date: '2026-09-22', city: 'TBD', summary: 'Still being planned', activities: [] },
+    { id: 'day-10', date: '2026-09-23', city: 'TBD', summary: 'Still being planned', activities: [] },
+    { id: 'day-11', date: '2026-09-24', city: 'TBD', summary: 'Still being planned', activities: [] },
+    { id: 'day-12', date: '2026-09-25', city: 'TBD', summary: 'Still being planned', activities: [] },
+    { id: 'day-13', date: '2026-09-26', city: 'TBD', summary: 'Still being planned', activities: [] },
+    {
+      id: 'day-14-return',
+      date: '2026-09-27',
+      city: 'Travel',
+      region: 'Haneda → Heathrow',
+      summary: 'Return flight — JL7121, direct to London',
+      activities: [
+        {
+          id: 'd14-1',
+          time: '13:05',
+          title: 'Depart Tokyo Haneda — JL7121',
+          category: 'transport',
+          location: 'Haneda Terminal 3',
+          description:
+            'Japan Airlines JL7121, Terminal 3. Arrives London Heathrow at 19:50 local time (same day).',
         },
       ],
     },
