@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Lightbulb, MapPin, MoveRight, Star, Trash2 } from 'lucide-react'
+import { ChevronDown, GripVertical, Lightbulb, MapPin, MoveRight, Star, Trash2 } from 'lucide-react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Activity, ActivityCategory } from '../types'
 import { categoryStyles } from '../lib/categoryStyles'
 import { formatTravelSegment } from '../lib/formatTravel'
+import { effectiveMapLocation } from '../lib/maps'
 import { useEditMode } from '../context/EditModeContext'
 import { useTripStore } from '../context/TripContext'
 import MapEmbed from './MapEmbed'
@@ -24,12 +27,35 @@ export default function ActivityCard({ dayId, activity, isLast }: ActivityCardPr
   const { updateActivity, deleteActivity } = useTripStore()
   const style = categoryStyles[activity.category]
   const Icon = style.icon
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: activity.id,
+    disabled: !editMode,
+  })
+  const sortableStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
 
   const patch = (fields: Partial<Activity>) => updateActivity(dayId, activity.id, fields)
 
   return (
-    <div className="flex gap-4">
+    <div
+      ref={setNodeRef}
+      style={sortableStyle}
+      className={`flex gap-4 bg-washi dark:bg-ink ${isDragging ? 'z-10 opacity-80' : ''}`}
+    >
       <div className="flex flex-col items-center">
+        {editMode && (
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="mb-1 flex h-5 w-5 touch-none items-center justify-center rounded-full text-sumi/30 hover:bg-sumi/10 hover:text-sumi/60 dark:text-white/30 dark:hover:bg-white/10"
+            aria-label="Drag to reorder"
+          >
+            <GripVertical size={13} />
+          </button>
+        )}
         <div
           className={`flex h-9 w-9 flex-none items-center justify-center rounded-full shadow-sm ${style.dot}`}
         >
@@ -158,11 +184,23 @@ export default function ActivityCard({ dayId, activity, isLast }: ActivityCardPr
                   )
                 )}
 
-                {activity.location && (
+                {editMode ? (
                   <p className="mt-2 flex items-center gap-1 text-xs text-sumi/50 dark:text-white/40">
                     <MapPin size={13} className="flex-none" />
-                    {activity.location}
+                    <EditableText
+                      value={activity.location ?? ''}
+                      onCommit={(location) => patch({ location })}
+                      placeholder="Location…"
+                      className="text-xs"
+                    />
                   </p>
+                ) : (
+                  activity.location && (
+                    <p className="mt-2 flex items-center gap-1 text-xs text-sumi/50 dark:text-white/40">
+                      <MapPin size={13} className="flex-none" />
+                      {activity.location}
+                    </p>
+                  )
                 )}
 
                 {editMode ? (
@@ -184,7 +222,21 @@ export default function ActivityCard({ dayId, activity, isLast }: ActivityCardPr
                   )
                 )}
 
-                {activity.map && <MapEmbed map={activity.map} />}
+                {editMode && (
+                  <label className="mt-2 flex items-center gap-2 text-xs text-sumi/50 dark:text-white/40">
+                    <span className="flex-none">Map search</span>
+                    <EditableText
+                      value={activity.map?.label ?? ''}
+                      onCommit={(label) =>
+                        patch({ map: { lat: activity.map?.lat ?? 0, lng: activity.map?.lng ?? 0, label } })
+                      }
+                      placeholder={`Auto-linked to "${activity.title}"`}
+                      className="text-xs"
+                    />
+                  </label>
+                )}
+
+                <MapEmbed map={effectiveMapLocation(activity)} />
 
                 <CommentsThread activityId={activity.id} />
               </div>

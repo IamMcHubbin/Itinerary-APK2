@@ -1,4 +1,4 @@
-import type { MapLocation } from '../types'
+import type { Activity, MapLocation } from '../types'
 
 /**
  * Search by name rather than raw coordinates. A bare lat/lng drops a
@@ -20,4 +20,16 @@ export function appleMapsUrl(map: MapLocation): string {
  */
 export function googleMapsEmbedUrl(map: MapLocation): string {
   return `https://maps.google.com/maps?q=${encodeURIComponent(map.label)}&z=15&output=embed`
+}
+
+/**
+ * The map location to actually show for an activity: an explicitly set one
+ * wins, otherwise falls back to searching by the activity's location text
+ * or title — same "search by name" approach as the rest of this file, so
+ * every activity gets a usable map link even without manual setup.
+ */
+export function effectiveMapLocation(activity: Activity): MapLocation {
+  const label = activity.map?.label.trim()
+  if (label) return { ...activity.map!, label }
+  return { lat: 0, lng: 0, label: activity.location?.trim() || activity.title }
 }
