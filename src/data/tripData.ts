@@ -1,17 +1,18 @@
 import type { Trip } from "../types";
 
-// Trip dates: Mon 14 Sep - Sun 27 Sep 2026. Arrival is Monday 14 Sep, not
-// Sunday 13 -- flight JL42 departs Heathrow Sun 13 09:10 BST and lands
-// Haneda Mon 14 06:45 JST, so Day 1 IS the arrival day, no separate travel
-// day before it. Tokyo is confirmed: 3 nights (14/15/16 Sep), then Hakone
-// (Day 4, 1 night, Tozan railway/cable car/ropeway -- no car rentals),
-// Kyoto (Days 5-7, 3 nights, still being planned), Osaka (Days 8-10, 3
-// nights, still being planned), Yoshino (Day 11, 1 night), a final Tokyo
-// night (Day 12), then Day 13 (Sat 26) as an explicit placeholder bridging
-// an open night-count question in the source plan to the real, already-
-// booked return flight JL7121 (Haneda -> Heathrow, Sun 27, Day 14). Tokyo
-// is locked; everything from Hakone onward is provisional pending booking
-// confirmation.
+// Trip dates: Mon 14 Sep - Sun 27 Sep 2026. Arrival is Monday 14 Sep, no
+// separate travel day before it (JL42 departs Heathrow Sun 13 09:10 BST,
+// lands Haneda Mon 14 06:45 JST -- Day 1 is the arrival day). Tokyo is
+// confirmed at 4 nights (14/15/16/17 Sep) -- matching the original
+// 13-night booking, which always had Tokyo at 4; earlier drafts only had
+// 3 nights of Tokyo content, so Day 4 is a genuine still-open 4th Tokyo
+// night rather than detailed plans. Then Hakone (Day 5, 1 night, Tozan
+// railway/cable car/ropeway -- no car rentals), Kyoto (Days 6-8, 3
+// nights, still being planned), Osaka (Days 9-11, 3 nights, still being
+// planned), Yoshino (Day 12, 1 night), a final Tokyo night (Day 13), then
+// the real, already-booked return flight JL7121 (Haneda -> Heathrow,
+// Sun 27, Day 14). Total: 13 nights / 14 days, matching the original
+// booking -- no bridging placeholder needed any more.
 export const trip: Trip = {
   title: "Japan",
   subtitle: "Tokyo · Hakone · Kyoto · Osaka · Yoshino",
@@ -47,19 +48,6 @@ export const trip: Trip = {
           description: "Ask the hotel to hold them if the room isn't ready.",
         },
         {
-          id: "d1-3",
-          time: "11:00",
-          title: "Shibuya",
-          category: "sightseeing",
-          description:
-            "Tokyo's youth culture and fashion centre, built around the world's busiest pedestrian crossing. Scramble Crossing (best seen from above — Tsutaya's Starbucks or the station walkway, both free), Hachiko statue, Center-gai, Shibuya 109, Miyashita Park. 2-3 hrs, 15 min from Shinjuku.",
-          map: {
-            lat: 35.659482,
-            lng: 139.7005596,
-            label: "Shibuya Scramble Crossing",
-          },
-        },
-        {
           id: "d1-4",
           time: "14:30",
           title: "Cat cafe — Calico Kabukicho",
@@ -80,17 +68,10 @@ export const trip: Trip = {
           description: "See options below.",
         },
         {
-          id: "d1-6",
-          time: "20:30",
-          title: "Golden Gai (optional)",
-          category: "experience",
-          description:
-            "Six narrow alleys of roughly 280 tiny bars, most seating 5-10 people. Pick one with an open door and a menu outside. Walking distance from the hotel, so it costs nothing to try and bail. Omoide Yokocho (yakitori under the tracks) is the alternative nearby.",
-          map: {
-            lat: 35.6941118,
-            lng: 139.7047611,
-            label: "Golden Gai",
-          },
+          id: "act-e507fcd0",
+          time: "11:00",
+          title: " Shinjuku Gyoen National Garden",
+          category: "sightseeing",
         },
       ],
       foodOptions: [
@@ -418,13 +399,6 @@ export const trip: Trip = {
             label: "B-Pump Ogikubo",
           },
         },
-        {
-          id: "d3-5",
-          time: "18:30",
-          title: "Return to Shinjuku. Repack for Hakone",
-          category: "transport",
-          description: "11 min on the Chuo Rapid.",
-        },
       ],
       foodOptions: [
         {
@@ -477,6 +451,16 @@ export const trip: Trip = {
     {
       id: "day-4",
       date: "2026-09-17",
+      city: "Tokyo",
+      summary: "Still being planned",
+      notes: [
+        "The 4th Tokyo night — the original 13-night booking always had Tokyo at 4 nights; the source plan's Day 1-3 content just didn't cover it. Nothing scheduled yet.",
+      ],
+      activities: [],
+    },
+    {
+      id: "day-5",
+      date: "2026-09-18",
       city: "Hakone",
       region: "Tokyo → Hakone (1 night)",
       summary: "Romancecar, Owakudani, Lake Ashi, onsen — no car rental",
@@ -486,14 +470,14 @@ export const trip: Trip = {
       ],
       activities: [
         {
-          id: "d4-1",
+          id: "d5-1",
           time: "07:30",
           title: "Check out of Shinjuku. Romancecar to Hakone-Yumoto",
           category: "transport",
           description: "~85 min direct from Shinjuku.",
         },
         {
-          id: "d4-2",
+          id: "d5-2",
           time: "10:30",
           title: "Owakudani",
           category: "sightseeing",
@@ -506,7 +490,7 @@ export const trip: Trip = {
           },
         },
         {
-          id: "d4-3",
+          id: "d5-3",
           time: "12:30",
           title: "Lake Ashi",
           category: "sightseeing",
@@ -523,7 +507,7 @@ export const trip: Trip = {
           },
         },
         {
-          id: "d4-4",
+          id: "d5-4",
           time: "19:00",
           title: "Check in — onsen",
           category: "lodging",
@@ -531,7 +515,7 @@ export const trip: Trip = {
       ],
       foodOptions: [
         {
-          id: "d4-f1",
+          id: "d5-f1",
           name: "CIRCLE HAKONE",
           description: "Nepalese curry/naan, Miyanoshita.",
           rating: 4.9,
@@ -542,7 +526,7 @@ export const trip: Trip = {
           },
         },
         {
-          id: "d4-f2",
+          id: "d5-f2",
           name: "Kinnode Shussei",
           description: "Ochazuke, traditional dishes. Near Yumoto.",
           rating: 4.9,
@@ -553,7 +537,7 @@ export const trip: Trip = {
           },
         },
         {
-          id: "d4-f3",
+          id: "d5-f3",
           name: "Saien",
           description:
             "Buddhist monk breakfast, vegetarian, book ahead. Opens 08:00-10:00 only — fits the morning you leave for Kyoto.",
@@ -565,7 +549,7 @@ export const trip: Trip = {
           },
         },
         {
-          id: "d4-f4",
+          id: "d5-f4",
           name: "GORA Brewery & Grill",
           description: "Fresh meat and sushi prepared live.",
           rating: 4.5,
@@ -578,21 +562,21 @@ export const trip: Trip = {
       ],
     },
     {
-      id: "day-5",
-      date: "2026-09-18",
+      id: "day-6",
+      date: "2026-09-19",
       city: "Kyoto",
       region: "Hakone → Kyoto (travel day)",
       summary: "Shinkansen to Kyoto, check in for 3 nights",
       activities: [
         {
-          id: "d5-1",
+          id: "d6-1",
           time: "10:00",
           title: "Odawara → Kyoto by Shinkansen",
           category: "transport",
           description: "Est. ~2 hrs (Hikari).",
         },
         {
-          id: "d5-2",
+          id: "d6-2",
           time: "13:00",
           title: "Kyoto check-in",
           category: "lodging",
@@ -601,8 +585,8 @@ export const trip: Trip = {
       ],
     },
     {
-      id: "day-6",
-      date: "2026-09-19",
+      id: "day-7",
+      date: "2026-09-20",
       city: "Kyoto",
       summary: "Still being planned",
       notes: [
@@ -611,28 +595,28 @@ export const trip: Trip = {
       activities: [],
     },
     {
-      id: "day-7",
-      date: "2026-09-20",
+      id: "day-8",
+      date: "2026-09-21",
       city: "Kyoto",
       summary: "Still being planned",
       activities: [],
     },
     {
-      id: "day-8",
-      date: "2026-09-21",
+      id: "day-9",
+      date: "2026-09-22",
       city: "Osaka",
       region: "Kyoto → Osaka (travel day)",
       summary: "Short hop to Osaka, check in for 3 nights",
       activities: [
         {
-          id: "d8-1",
+          id: "d9-1",
           time: "10:00",
           title: "Kyoto → Osaka",
           category: "transport",
           description: "~15 min Shinkansen or ~30 min JR Special Rapid.",
         },
         {
-          id: "d8-2",
+          id: "d9-2",
           time: "12:00",
           title: "Osaka check-in",
           category: "lodging",
@@ -641,15 +625,15 @@ export const trip: Trip = {
       ],
     },
     {
-      id: "day-9",
-      date: "2026-09-22",
+      id: "day-10",
+      date: "2026-09-23",
       city: "Osaka",
       summary: "Still being planned",
       activities: [],
     },
     {
-      id: "day-10",
-      date: "2026-09-23",
+      id: "day-11",
+      date: "2026-09-24",
       city: "Osaka",
       summary: "Still being planned",
       notes: [
@@ -658,8 +642,8 @@ export const trip: Trip = {
       activities: [],
     },
     {
-      id: "day-11",
-      date: "2026-09-24",
+      id: "day-12",
+      date: "2026-09-25",
       city: "Yoshino",
       region: "Osaka → Yoshino (1 night)",
       summary: "Yoshino-Kumano National Park",
@@ -668,7 +652,7 @@ export const trip: Trip = {
       ],
       activities: [
         {
-          id: "d11-1",
+          id: "d12-1",
           time: "09:00",
           title: "Osaka Abenobashi → Yoshino",
           category: "transport",
@@ -676,7 +660,7 @@ export const trip: Trip = {
             "Kintetsu Minami-Osaka Line, est. ~1h15 by Limited Express (~1h45 ordinary).",
         },
         {
-          id: "d11-2",
+          id: "d12-2",
           time: "11:00",
           title: "Yoshino-Kumano National Park",
           category: "sightseeing",
@@ -688,7 +672,7 @@ export const trip: Trip = {
           },
         },
         {
-          id: "d11-3",
+          id: "d12-3",
           time: "18:00",
           title: "Yoshino stay",
           category: "lodging",
@@ -696,8 +680,8 @@ export const trip: Trip = {
       ],
     },
     {
-      id: "day-12",
-      date: "2026-09-25",
+      id: "day-13",
+      date: "2026-09-26",
       city: "Tokyo",
       region: "Yoshino → Tokyo (final night)",
       summary: "Shinkansen back to Tokyo",
@@ -706,23 +690,13 @@ export const trip: Trip = {
       ],
       activities: [
         {
-          id: "d12-1",
+          id: "d13-1",
           time: "06:00",
           title: "Yoshino → Kyoto/Shin-Osaka → Tokyo",
           category: "transport",
           description: "Shinkansen — est. ~4.5-5 hrs door to door.",
         },
       ],
-    },
-    {
-      id: "day-13",
-      date: "2026-09-26",
-      city: "TBD",
-      summary: "Still being planned",
-      notes: [
-        "The source plan's own night count doesn't quite add up yet (Tokyo confirmed at 3 nights vs. an original 4-night booking) — this day bridges that gap to land the return flight on its real, already-booked date (Sun 27) rather than guessing. Confirm against the actual bookings.",
-      ],
-      activities: [],
     },
     {
       id: "day-14",
